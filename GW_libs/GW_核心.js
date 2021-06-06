@@ -50,7 +50,7 @@ function test() {
 切换模拟状态();
 
 function init() {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
         创建质点(
             new 质点(
                 Math.round(生成随机数(10, 100)),

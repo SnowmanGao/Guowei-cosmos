@@ -18,7 +18,7 @@ const pi = Math.PI;
 
 /**物理常数 */
 // var _G_ = 6.672e-11;
-var _G_ = 1
+var _G_ = 0.001
 var _g_ = 9.8;
 
 
@@ -137,6 +137,10 @@ Object.assign(向量2.prototype, {
 
     数乘: function (s) {
 
+        if (!typeof s == 'number' || isNaN(s) == true) {
+            console.warn('数乘：参数错误！必须传入一个实数,而你传入了 ' + s);
+            return;
+        }
         this.x *= s;
         this.y *= s;
 
@@ -194,12 +198,65 @@ Object.assign(向量2.prototype, {
 
 
     求模方: function () {
+
         return this.x * this.x + this.y * this.y;
+
     },
 
     求模长: function () {
 
         return Math.sqrt(this.求模方(this));
+
+    },
+
+    求距离: function (v) {
+
+        return v.减去(this).求模长();
+
+    },
+
+    求距矢: function (v) {
+
+        return v.减去(this);
+    },
+
+
+    求夹角: function () {
+
+        //返回弧度 [0,2π)
+        return Math.atan(this.y / this.x);
+
+    },
+
+    /** 
+     * 取向量的单位方向向量。
+     * (0,0) 的单位向量特设为 (0,0) 
+     */
+    求单位向量: function () {
+
+        // 然而在数学中(0,0)的单位向量是任意的！
+        if (this.求模长() > 1000) {
+            console.warn('toobig!', this.求模长());
+        }
+        return this.数除(this.求模长() || 1);
+
+    },
+
+    求相反向量: function () {
+
+        this.x = -this.x;
+        this.y = -this.y
+
+        return this;
+
+    },
+
+    四舍五入: function () {
+
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
+
+        return this;
 
     },
 
@@ -217,47 +274,6 @@ Object.assign(向量2.prototype, {
         }
 
     },
-
-    求夹角: function () {
-
-        //返回弧度 [0,2π)
-        return Math.atan(this.y / this.x);
-
-    },
-
-    /** 取向量的单位方向向量。
-     * (0,0) 的单位向量特设为 (0,0) 
-     * */
-    求单位向量: function () {
-
-        // 特别的，这里让(0,0)的单位向量是(0,0)
-        // 然而在数学中(0,0)的单位向量是任意的！
-        if(this.求模长()> 1000){
-            console.warn('toobig!',this.求模长());
-        }
-        return this.数除(this.求模长() || 1);
-
-    },
-
-    求相反向量: function () {
-
-        this.x = -this.x;
-        this.y = -this.y
-
-        return this;
-
-    },
-
-    求距离: function (v) {
-
-        return v.减去(this).求模长();
-
-    },
-
-    求距矢: function (v) {
-
-        return v.减去(this);
-    }
 
 
 })
@@ -333,13 +349,14 @@ Object.assign(质点.prototype, {
 
     计算万有引力: function (massP) {
         //指向其他质点的向量
-        let tempVec = massP.求距矢(this);
-        let tempVecSq = tempVec.求模方();
+        let vec = new 向量2().复制自(massP.位置);
+        let mass = massP.质量;
+        //上面这一步必要！绝对不能直接操作massP，那是引用对象！
+        let tempVec = vec.求距矢(this.位置);
         let ans = tempVec
             .求单位向量()
-            .数乘(_G_ * massP.质量 * this.质量 / tempVecSq);
+            .数乘(_G_ * mass * this.质量 / tempVec.求模方());
 
-        console.log(ans);
         return ans;
 
     },
@@ -349,10 +366,10 @@ Object.assign(质点.prototype, {
 function fixInfo(info) {
     //修正保留位数
     let arr = [0, 0, 0, 0];
-    arr[0] = Math.round(info.位置.x);
-    arr[1] = Math.round(info.位置.y);
-    arr[2] = Math.round(info.速度.x);
-    arr[3] = Math.round(info.速度.y);
+    arr[0] = (info.位置.x).toFixed(1);
+    arr[1] = (info.位置.y).toFixed(1);
+    arr[2] = (info.速度.x).toFixed(1);
+    arr[3] = (info.速度.y).toFixed(1);
     arr[5] = info.id;
     return arr;
 }
@@ -386,17 +403,23 @@ function 下一帧() {
         万物.forEach(other => {
             if (self.id < other.id) {
                 //排除重复计算，优化计算次数
-                console.log('bianli:', self, other);
                 let tempVec = self.计算万有引力(other);
+                console.log('万有引力', tempVec);
                 self.加速度.加和(tempVec.数除(self.质量));
                 other.加速度.加和(tempVec.求相反向量().数除(other.质量));
             }
         });
 
+        // console.warn('ass', self.加速度);
         self.速度.加和(self.加速度);
+        // console.warn('vel', self.速度);
         self.位置.加和(self.速度);
+        // console.warn('pos', self.位置);
         self.渲染对象.x(self.位置.x);
         self.渲染对象.y(self.位置.y);
+        
+        self.加速度=_零向量2;
+        
     });
 
     已逝帧数++;

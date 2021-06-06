@@ -93,7 +93,7 @@ function 求鼠标坐标() {
 }
 
 function 显示位矢() {
-    let temp = 求鼠标坐标();
+    let temp = 求鼠标坐标().四舍五入();
     posText.text(`x: ${temp.x} , y: ${temp.y}`);
     pointerArrow.points([0, 0, temp.x, temp.y]);
 
