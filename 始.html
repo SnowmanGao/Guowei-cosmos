@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <script src="https://unpkg.com/konva@8/konva.min.js"></script> -->
+    <link rel="stylesheet" href="./GW_libs/GW_美工.css">
+    <title>Guowei-cosmos</title>
+</head>
+<body>
+    <div id='canvaser' style="background: aliceblue;"></div>
+    <h3 id='framer'></h3>
+    <div>
+        <button class="btn" onclick="zoom('out')">缩小-</button>
+        <button class="btn" onclick="zoom('in')">放大+</button>
+        <button class="btn" onclick="zoom('center')" onkeydown="options.永远居中=true;">居中</button>
+        <button class="btn" onclick="切换模拟状态()">暂停/开始</button>
+    </div>
+    <div>
+        <button class="btn" onclick="zoom('left')">左移</button>
+        <button class="btn" onclick="zoom('right')">右移</button>
+        <button class="btn" onclick="zoom('up')">上移</button>
+        <button class="btn" onclick="zoom('down')">下移</button>
+        <input type="number" name="step" id="offsetStep" value="30">
+    </div>
+</body>
+</html>
+
+
+<script src="./GW_libs/GW_数理.js"></script>
+<script src="./GW_libs/konva.js"></script>
+<script src="./GW_libs/GW_渲染.js"></script>
+<script src="./GW_libs/GW_核心.js"></script>

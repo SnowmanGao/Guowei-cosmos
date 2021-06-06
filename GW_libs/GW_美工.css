@@ -1,0 +1,54 @@
+/* ------------------button-------------------- */
+
+.btn {
+    background-color: white;
+    color: black;
+    width: auto;
+    height: auto;
+    font-size: 1.25em;
+
+    padding: 5px 10px 5px 10px;
+    margin: 4px 2px;
+    -webkit-transition-duration: 0.4s;
+    /* Safari */
+    transition-duration: 0.4s;
+    cursor: pointer;
+    border: 2px solid #4CAF50;
+    border-radius: 5px;
+}
+
+.btn:hover {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn:active {
+    background-color: rgb(13, 107, 19);
+}
+
+#ok {
+    margin-left: 25%;
+    width: 40%;
+    border: 2px solid dodgerblue;
+}
+
+#ok:hover {
+    background-color: dodgerblue;
+    color: white;
+}
+
+#ok:active {
+    background-color: rgb(20, 87, 155);
+}
+
+/* ------------------/button------------------- */
+
+* {
+    font-family: "微软雅黑", Microsoft YaHei;
+}
+
+canvas {
+    border: 1px solid black;
+    background: linear-gradient(#F1F3F4, rgb(171, 173, 173));
+}
+
