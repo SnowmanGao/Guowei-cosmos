@@ -1,14 +1,30 @@
 /* ------------------button-------------------- */
+* {
+    touch-action: none;
+}
+
+body{
+    overflow: hidden;
+}
+
+.gui {
+    position: fixed;
+    bottom: 20px;
+    z-index: 20;
+}
+
+#canvaser {
+    background: aliceblue;
+}
 
 .btn {
     background-color: white;
     color: black;
-    width: auto;
-    height: auto;
-    font-size: 1.25em;
-
-    padding: 5px 10px 5px 10px;
-    margin: 4px 2px;
+    min-width: 4em;
+    height: 2em;
+    font-size: 2em;
+    padding: 3px 5px 6px 5px;
+    margin: 5px 5px;
     -webkit-transition-duration: 0.4s;
     /* Safari */
     transition-duration: 0.4s;
@@ -16,6 +32,8 @@
     border: 2px solid #4CAF50;
     border-radius: 5px;
 }
+
+
 
 .btn:hover {
     background-color: #4CAF50;
@@ -51,4 +69,3 @@ canvas {
     border: 1px solid black;
     background: linear-gradient(#F1F3F4, rgb(171, 173, 173));
 }
-
