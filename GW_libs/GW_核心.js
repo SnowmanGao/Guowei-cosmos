@@ -9,7 +9,7 @@ const _默认样式 = {
     半径: 10,
 }
 
-var 加速度上限 = 50,
+var 加速度上限 = 30,
     初始质点数 = 3;
 
 
@@ -93,17 +93,19 @@ function sets(引力常数_ = _G_, 初始质点数_ = 初始质点数, 加速度
 
 function init() {
     for (let i = 0; i < 初始质点数; i++) {
-        let mass = Math.round(生成随机数(20, 100))
+        let mass = Math.round(生成随机数(30, 100))
         创建质点(
             new 质点(
                 mass,
                 new 生成随机向量(),
-                new 生成随机向量(0), {
+                new 生成随机向量(2), {
                     颜色: 生成随机颜色(),
                     半径: mass / 2
                 }
             )
         )
     }
+
+    更新质心渲染();
 
 }

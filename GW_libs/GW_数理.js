@@ -18,7 +18,7 @@ const pi = Math.PI;
 
 /**物理常数 */
 // var _G_ = 6.672e-11;
-var _G_ = 10
+var _G_ = 5
 // var _g_ = 9.8;
 
 
@@ -350,7 +350,7 @@ Object.assign(质点.prototype, {
         setTimeout(function () {
             // this.渲染对象.destroy();
             for (var i = 0; i < 万物.length; i++) {
-                if (万物[i].id == 2) {
+                if (万物[i].id == this.id) {
                     万物.splice(i, 1);
                 }
             }
@@ -464,6 +464,22 @@ Object.assign(质点.prototype, {
 
 })
 
+/**返回一个对象列的质心位矢 */
+function 计算质心(MassPArr) {
+    let tempVec = 取零向量();
+    let sumMass = 0;
+    MassPArr.forEach(MassP => {
+        if (MassP != null) {
+            let massPos = new 向量2().复制自(MassP.位置)
+            let mass = MassP.质量;
+            tempVec.加和(massPos.数乘(mass));
+            sumMass += mass;
+        }
+    });
+    return tempVec.数除(sumMass);
+}
+
+
 function fixInfo(info) {
     //修正保留位数
     let arr = [0, 0, 0, 0];
@@ -472,6 +488,7 @@ function fixInfo(info) {
     arr[2] = (info.速度.x).toFixed(1);
     arr[3] = (info.速度.y).toFixed(1);
     arr[5] = info.id;
+    arr[6] = (info.质量).toFixed(1)
     return arr;
 }
 
@@ -512,6 +529,8 @@ function 计算合加速度_万有引力(self) {
 
 function 下一帧() {
 
+    // console.time(1);
+
     //主要遍历 self,other都是质点！
     万物.forEach(self => {
 
@@ -530,9 +549,10 @@ function 下一帧() {
             }
         })
 
+        // console.timeEnd(1);
 
         //警告过大！
-        if (self.加速度.求模长() > 加速度上限_) {
+        if (self.加速度.求模长() > 加速度上限) {
             console.warn('Too Fast!', self.加速度.求模长());
             self.渲染对象.cache();
             self.渲染对象.filters([Konva.Filters.Noise, Konva.Filters.Blur]);

@@ -65,11 +65,20 @@ var pointerArrow = new Konva.Arrow({
     opacity: 0.1,
 
 });
+var massCenterStar = new Konva.Star({
+    x: 0,
+    y: 0,
+    numPoints: 5,
+    innerRadius:2,
+    outerRadius: 4,
+    fill: 'red',
+})
 
 图层_界面.add(posText);
 图层_界面.add(frameText);
 图层_界面.add(focusText);
 图层_界面.add(pointerArrow);
+图层_界面.add(massCenterStar);
 
 
 
@@ -126,17 +135,16 @@ var guiAnim = new Konva.Animation(function () {
 
         focusText.text(
 
-            `圆[id:${temp[5]}] : pos=(${temp[0]} , ${temp[1]})  vel=(${temp[2]} , ${temp[3]})
-            F = ${force_G.x.toFixed(2)} , ${force_G.y.toFixed(2)}
+            `圆[id:${temp[5]}]  mass = ${temp[6]}
+            pos=(${temp[0]} , ${temp[1]})  
+            vel=(${temp[2]} , ${temp[3]})
+            Force_G = ${force_G.x.toFixed(2)} , ${force_G.y.toFixed(2)}
             `
         );
 
         if (!为运行中) {
-            选中图形列.forEach((obj) => {
-                obj.attrs.位矢箭头.points(
-                    [0, 0, obj.attrs.质点对象.位置.x, obj.attrs.质点对象.位置.y]
-                )
-            })
+            更新物体位矢箭头();
+            更新质心渲染();
         }
     }
 
@@ -165,13 +173,8 @@ var mainAnim = new Konva.Animation(function () {
         return false;
     }
 
-    选中图形列.forEach((obj) => {
-
-        obj.attrs.位矢箭头.points(
-            [0, 0, obj.attrs.质点对象.位置.x, obj.attrs.质点对象.位置.y]
-        )
-
-    })
+    更新物体位矢箭头();
+    更新质心渲染();
 
     下一帧();
 
@@ -179,3 +182,18 @@ var mainAnim = new Konva.Animation(function () {
 
 guiAnim.start();
 mainAnim.start();
+
+
+function 更新物体位矢箭头() {
+    选中图形列.forEach((obj) => {
+        obj.attrs.位矢箭头.points(
+            [0, 0, obj.attrs.质点对象.位置.x, obj.attrs.质点对象.位置.y]
+        )
+    })
+}
+
+function 更新质心渲染() {
+    let tempVec = 计算质心(万物);
+    massCenterStar.x(tempVec.x);
+    massCenterStar.y(tempVec.y);
+}
