@@ -3,7 +3,7 @@ var 宽度 = window.innerWidth;
 var 高度 = window.innerHeight;
 var mouseOverCanvas = false;
 var mouseOverObj = false;
-var mouseOverObjer = {};
+var mouseOverObjMP = {};
 
 var 预设配色 = ['#cff09e', '#00dffc', '#ffc952', '#f6ea8c', '#F0E5DE', '#D499B9']
 
@@ -79,7 +79,7 @@ var 图层_物体 = new Konva.Layer();
 
 /**------------------------------------------- */
 
-function 求鼠标坐标() {
+function 取鼠标坐标() {
     //取鼠标坐标（向量2），若鼠标不在，则返回零向量
     if (mouseOverCanvas == true) {
         let absPos = 舞台.getAbsolutePosition(),
@@ -93,25 +93,39 @@ function 求鼠标坐标() {
 }
 
 function 显示位矢() {
-    let temp = 求鼠标坐标().四舍五入();
+    let temp = 取鼠标坐标().四舍五入();
     posText.text(`x: ${temp.x} , y: ${temp.y}`);
     pointerArrow.points([0, 0, temp.x, temp.y]);
 
 }
 
 
+
+
+
+/*---------------------------动画gui------------------------------- */
+
 var guiAnim = new Konva.Animation(function () {
     if (mouseOverCanvas == false) {
         return false;
     }
     显示位矢();
+
     //显示鼠标悬停物体信息
     if (mouseOverObj) {
-        let temp = fixInfo(mouseOverObjer);
+
+        let temp = fixInfo(mouseOverObjMP);
+        
+        let a = mouseOverObjMP.计算万有引力(舞台.findOne('#'+(3-mouseOverObjMP.id)).attrs.质点对象)
+
         focusText.text(
-            `圆[id:${temp[5]}] : pos=(${temp[0]} , ${temp[1]})  vel=(${temp[2]} , ${temp[3]})`
+
+            `圆[id:${temp[5]}] : pos=(${temp[0]} , ${temp[1]})  vel=(${temp[2]} , ${temp[3]})
+            F = ${a.x} , ${a.y}
+            `
         );
     }
+
     //显示基本坐标信息
     absPos = 舞台.getAbsolutePosition();
     posText.x(15 - absPos.x);
@@ -123,7 +137,11 @@ var guiAnim = new Konva.Animation(function () {
 
     //显示已逝帧数
     frameText.text(`t = ${已逝帧数}`);
+
 }, 图层_场);
+
+
+
 
 var mainAnim = new Konva.Animation(function () {
     if (typeof 万物 == 'undefined') {

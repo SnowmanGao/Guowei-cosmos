@@ -4,8 +4,8 @@
 /* File Info 
  * Author:      SnowmanGao
  * CreateTime:  2021/6/5下午1:38:15 
- * LastEditor:  SnowmanGao 
- * ModifyTime:  2021/6/5下午1:40:59 
+ * LastEditor:  SnowmanGao
+ * ModifyTime:  2021/6/7下午1:00:53
  * Description: 定义了一切用到的数理工具，包括常用函数、向量、矩阵工具，
  *              还可以完成简单的物理计算。
  */
@@ -18,7 +18,7 @@ const pi = Math.PI;
 
 /**物理常数 */
 // var _G_ = 6.672e-11;
-var _G_ = 0.001
+var _G_ = 10
 var _g_ = 9.8;
 
 
@@ -38,6 +38,11 @@ function 到角度(rad) {
     return rad * 180 / π;
 }
 
+function 取零向量() {
+    
+    return new 向量2(0, 0);
+
+}
 
 
 /*----------------------随机---------------------*/
@@ -78,6 +83,19 @@ function 生成随机数(min = 0, max = 1) {
 
 
 /*-------------------------------------------*/
+
+
+function 限制向量(vec, x = 100, y) {
+    if (y == undefined) {
+        y = x;
+    }
+    if (vec.x > x || vec.y > y) {
+        console.warn('限制向量：超出限制!（已压限）');
+        return new 向量2(0, 0);
+    }
+
+    return vec;
+}
 
 
 
@@ -211,13 +229,15 @@ Object.assign(向量2.prototype, {
 
     求距离: function (v) {
 
-        return v.减去(this).求模长();
+        let tempVec = new 向量2().复制自(v);
+        return tempVec.减去(this).求模长();
 
     },
 
     求距矢: function (v) {
 
-        return v.减去(this);
+        let tempVec = new 向量2().复制自(v);
+        return tempVec.减去(this);
     },
 
 
@@ -235,17 +255,27 @@ Object.assign(向量2.prototype, {
     求单位向量: function () {
 
         // 然而在数学中(0,0)的单位向量是任意的！
-        if (this.求模长() > 1000) {
-            console.warn('toobig!', this.求模长());
-        }
-        return this.数除(this.求模长() || 1);
+        let tempVec = new 向量2().复制自(this)
+
+        return tempVec.数除(tempVec.求模长() || 1);
 
     },
 
+    /**求相反向量，但不改变此向量的值 */
     求相反向量: function () {
 
+        return new 向量2(-this.x, -this.y);
+
+    },
+
+    /**
+     * 将自己变为自己的相反向量 
+     * ！！！链式编程存在严重bug，请不要链式使用！！！
+     */
+    反向: function () {
+
         this.x = -this.x;
-        this.y = -this.y
+        this.y = -this.y;
 
         return this;
 
@@ -281,7 +311,7 @@ Object.assign(向量2.prototype, {
 
 
 /**质点对象（请不要使用此函数直接创建质点） */
-function 质点(质量 = 1, 位置 = _零向量2, 速度 = _零向量2, 样式 = _默认样式) {
+function 质点(质量 = 1, 位置 = 取零向量(), 速度 = 取零向量(), 样式 = _默认样式) {
 
     this.质量 = 质量;
     this.位置 = 位置;
@@ -293,7 +323,7 @@ function 质点(质量 = 1, 位置 = _零向量2, 速度 = _零向量2, 样式 =
     this.渲染对象 = null;
 
     //用于缓存受力，请勿直接设置加速度
-    this.加速度 = _零向量2;
+    this.加速度 = 取零向量();
 
     return this;
 }
@@ -303,6 +333,7 @@ Object.assign(质点.prototype, {
     是质点: true,
 
     加入渲染队列: function () {
+
         let circle = new Konva.Circle({
             x: this.位置.x,
             y: this.位置.y,
@@ -315,12 +346,14 @@ Object.assign(质点.prototype, {
             draggable: 'true',
 
             //绑定对象（额外属性）
+            id: this.id.toString(),
             质点对象: this,
         });
+
         //绑定事件
         circle.on('mouseover', function () {
             mouseOverObj = true;
-            mouseOverObjer = this.attrs.质点对象;
+            mouseOverObjMP = this.attrs.质点对象;
         });
         circle.on('mouseout', function () {
             mouseOverObj = false;
@@ -330,9 +363,11 @@ Object.assign(质点.prototype, {
             this.attrs.质点对象.位置.x = this.attrs.x;
             this.attrs.质点对象.位置.y = this.attrs.y;
         })
+
         //绑定对象
         this.渲染对象 = circle;
         图层_场.add(circle);
+
     },
 
     求距离: function (massP) {
@@ -348,6 +383,11 @@ Object.assign(质点.prototype, {
     },
 
     计算万有引力: function (massP) {
+
+        if (massP == undefined || massP.是质点 == false) {
+            console.warn('计算万有引力：必须传入一个质点参数！');
+            return;
+        }
         //指向其他质点的向量
         let vec = new 向量2().复制自(massP.位置);
         let mass = massP.质量;
@@ -355,7 +395,7 @@ Object.assign(质点.prototype, {
         let tempVec = vec.求距矢(this.位置);
         let ans = tempVec
             .求单位向量()
-            .数乘(_G_ * mass * this.质量 / tempVec.求模方());
+            .数乘(-_G_ * mass * this.质量 / tempVec.求模方());
 
         return ans;
 
@@ -386,7 +426,8 @@ function 创建质点(massP) {
     }
 
     massP.加入渲染队列();
-    万物.add(massP);
+    万物.push(massP);
+    //万物.add(massP);
 
 }
 
@@ -402,24 +443,34 @@ function 下一帧() {
         //万有引力
         万物.forEach(other => {
             if (self.id < other.id) {
+
                 //排除重复计算，优化计算次数
                 let tempVec = self.计算万有引力(other);
-                console.log('万有引力', tempVec);
+                let tempVec2 = new 向量2().复制自(tempVec);
+
                 self.加速度.加和(tempVec.数除(self.质量));
-                other.加速度.加和(tempVec.求相反向量().数除(other.质量));
+
+                other.加速度.加和(tempVec2.数除(-other.质量));
+
             }
         });
 
-        // console.warn('ass', self.加速度);
+        //警告过大！
+        if (self.加速度.求模长() > 50) {
+            console.warn('Too Fast!', self.加速度.求模长());
+            self.位置 = 生成随机向量(200);
+            self.速度 = 生成随机向量(2);
+            self.加速度 = 生成随机向量(0);
+        }
+
         self.速度.加和(self.加速度);
-        // console.warn('vel', self.速度);
         self.位置.加和(self.速度);
-        // console.warn('pos', self.位置);
+
         self.渲染对象.x(self.位置.x);
         self.渲染对象.y(self.位置.y);
-        
-        self.加速度=_零向量2;
-        
+
+        self.加速度 = 取零向量();
+
     });
 
     已逝帧数++;
