@@ -19,12 +19,12 @@ const pi = Math.PI;
 /**物理常数 */
 // var _G_ = 6.672e-11;
 var _G_ = 10
-var _g_ = 9.8;
+// var _g_ = 9.8;
 
 
 function 到弧度(deg) {
     if (typeof deg !== 'number') {
-        console.warn('到弧度：参数错误！只能传入角度（实数）。');
+        console.error('到弧度：参数错误！只能传入角度（实数）。');
         return;
     }
     return deg * π / 180;
@@ -32,14 +32,14 @@ function 到弧度(deg) {
 
 function 到角度(rad) {
     if (typeof rad !== 'number') {
-        console.warn('到角度：参数错误！只能传入弧度（实数）。');
+        console.error('到角度：参数错误！只能传入弧度（实数）。');
         return;
     }
     return rad * 180 / π;
 }
 
 function 取零向量() {
-    
+
     return new 向量2(0, 0);
 
 }
@@ -90,7 +90,7 @@ function 限制向量(vec, x = 100, y) {
         y = x;
     }
     if (vec.x > x || vec.y > y) {
-        console.warn('限制向量：超出限制!（已压限）');
+        console.error('限制向量：超出限制!（已压限）');
         return new 向量2(0, 0);
     }
 
@@ -156,7 +156,7 @@ Object.assign(向量2.prototype, {
     数乘: function (s) {
 
         if (!typeof s == 'number' || isNaN(s) == true) {
-            console.warn('数乘：参数错误！必须传入一个实数,而你传入了 ' + s);
+            console.error('数乘：参数错误！必须传入一个实数,而你传入了 ' + s);
             return;
         }
         this.x *= s;
@@ -332,6 +332,32 @@ Object.assign(质点.prototype, {
 
     是质点: true,
 
+    销毁: function () {
+        if (this.渲染对象.attrs.位矢箭头 !== undefined) {
+            this.渲染对象.attrs.位矢箭头.destroy();
+        }
+        var destroyTween = new Konva.Tween({
+            node: this.渲染对象,
+            duration: 0.5,
+            fill: 'white',
+            rotation: Math.PI * 2,
+            opacity: 0,
+            strokeWidth: 3,
+            scaleX: 1.5,
+            scaleY: 1.5
+        });
+        destroyTween.play();
+        setTimeout(function () {
+            // this.渲染对象.destroy();
+            for (var i = 0; i < 万物.length; i++) {
+                if (万物[i].id == 2) {
+                    万物.splice(i, 1);
+                }
+            }
+            delete this;
+        }, 600);
+    },
+
     加入渲染队列: function () {
 
         let circle = new Konva.Circle({
@@ -347,6 +373,8 @@ Object.assign(质点.prototype, {
 
             //绑定对象（额外属性）
             id: this.id.toString(),
+            为选中: false,
+            位矢箭头: null,
             质点对象: this,
         });
 
@@ -362,6 +390,39 @@ Object.assign(质点.prototype, {
         circle.on('dragmove', function () {
             this.attrs.质点对象.位置.x = this.attrs.x;
             this.attrs.质点对象.位置.y = this.attrs.y;
+        })
+        circle.on('click', function () {
+            if (this.attrs.为选中) {
+
+                //取消选中
+                this.strokeWidth(1);
+                this.stroke('#000');
+                this.attrs.为选中 = false;
+                this.attrs.位矢箭头.destroy();
+                选中质点 = undefined;
+
+            } else {
+
+                //选中
+                var objPosArrow = new Konva.Arrow({
+                    x: 0,
+                    y: 0,
+                    points: [0, 0, 0, -1],
+                    pointerLength: 8,
+                    pointerWidth: 6,
+                    fill: 'red',
+                    stroke: 'red',
+                    strokeWidth: 2,
+                    opacity: 0.5,
+                });
+                this.attrs.位矢箭头 = objPosArrow;
+                图层_界面.add(objPosArrow);
+                this.strokeWidth(3);
+                this.stroke('#f00');
+                this.attrs.为选中 = true;
+                选中图形列.push(this);
+
+            }
         })
 
         //绑定对象
@@ -385,7 +446,7 @@ Object.assign(质点.prototype, {
     计算万有引力: function (massP) {
 
         if (massP == undefined || massP.是质点 == false) {
-            console.warn('计算万有引力：必须传入一个质点参数！');
+            console.error('计算万有引力：必须传入一个质点参数！');
             return;
         }
         //指向其他质点的向量
@@ -434,10 +495,24 @@ function 创建质点(massP) {
 
 
 
+function 计算合加速度_万有引力(self) {
+    //挨个遍历，仅供显示模块
+    let tempVec = 取零向量();
+    万物.forEach(other => {
+        if (self.id != other.id) {
+
+            tempVec.加和(self.计算万有引力(other));
+
+        }
+    })
+    return tempVec;
+}
+
+
 
 function 下一帧() {
 
-    //主要遍历
+    //主要遍历 self,other都是质点！
     万物.forEach(self => {
 
         //万有引力
@@ -453,11 +528,19 @@ function 下一帧() {
                 other.加速度.加和(tempVec2.数除(-other.质量));
 
             }
-        });
+        })
+
 
         //警告过大！
-        if (self.加速度.求模长() > 50) {
+        if (self.加速度.求模长() > 加速度上限_) {
             console.warn('Too Fast!', self.加速度.求模长());
+            self.渲染对象.cache();
+            self.渲染对象.filters([Konva.Filters.Noise, Konva.Filters.Blur]);
+            self.渲染对象.noise(100);
+            self.渲染对象.blurRadius(0.5);
+            setTimeout(() => {
+                self.销毁();
+            }, 1500);
             self.位置 = 生成随机向量(200);
             self.速度 = 生成随机向量(2);
             self.加速度 = 生成随机向量(0);
@@ -471,8 +554,9 @@ function 下一帧() {
 
         self.加速度 = 取零向量();
 
-    });
 
-    已逝帧数++;
-    //TODO：konva重绘
+
+        已逝帧数++;
+        //TODO：konva重绘
+    })
 }

@@ -1,9 +1,14 @@
 var 已逝帧数 = 0
 var 宽度 = window.innerWidth;
 var 高度 = window.innerHeight;
+//鼠标是否在画布
 var mouseOverCanvas = false;
+//鼠标是否在物体
 var mouseOverObj = false;
+//鼠标下的物体的对应质点
 var mouseOverObjMP = {};
+
+var 选中图形列 = [];
 
 var 预设配色 = ['#cff09e', '#00dffc', '#ffc952', '#f6ea8c', '#F0E5DE', '#D499B9']
 
@@ -55,16 +60,17 @@ var pointerArrow = new Konva.Arrow({
     points: [0, 0, 0, 0],
     pointerLength: 8,
     pointerWidth: 6,
-    fill: 'black',
-    stroke: 'blue',
+    stroke: 'black',
     strokeWidth: 2,
-    opacity: 0.3,
+    opacity: 0.1,
 
 });
+
 图层_界面.add(posText);
 图层_界面.add(frameText);
 图层_界面.add(focusText);
 图层_界面.add(pointerArrow);
+
 
 
 
@@ -105,8 +111,9 @@ function 显示位矢() {
 
 /*---------------------------动画gui------------------------------- */
 
+
 var guiAnim = new Konva.Animation(function () {
-    if (mouseOverCanvas == false) {
+    if (!mouseOverCanvas) {
         return false;
     }
     显示位矢();
@@ -115,15 +122,22 @@ var guiAnim = new Konva.Animation(function () {
     if (mouseOverObj) {
 
         let temp = fixInfo(mouseOverObjMP);
-        
-        let a = mouseOverObjMP.计算万有引力(舞台.findOne('#'+(3-mouseOverObjMP.id)).attrs.质点对象)
+        let force_G = 计算合加速度_万有引力(mouseOverObjMP);
 
         focusText.text(
 
             `圆[id:${temp[5]}] : pos=(${temp[0]} , ${temp[1]})  vel=(${temp[2]} , ${temp[3]})
-            F = ${a.x} , ${a.y}
+            F = ${force_G.x.toFixed(2)} , ${force_G.y.toFixed(2)}
             `
         );
+
+        if (!为运行中) {
+            选中图形列.forEach((obj) => {
+                obj.attrs.位矢箭头.points(
+                    [0, 0, obj.attrs.质点对象.位置.x, obj.attrs.质点对象.位置.y]
+                )
+            })
+        }
     }
 
     //显示基本坐标信息
@@ -144,11 +158,23 @@ var guiAnim = new Konva.Animation(function () {
 
 
 var mainAnim = new Konva.Animation(function () {
+
+    //防止bug
     if (typeof 万物 == 'undefined') {
         console.log('归谬者：万物为空，行空白帧。');
         return false;
     }
+
+    选中图形列.forEach((obj) => {
+
+        obj.attrs.位矢箭头.points(
+            [0, 0, obj.attrs.质点对象.位置.x, obj.attrs.质点对象.位置.y]
+        )
+
+    })
+
     下一帧();
+
 }, 图层_场);
 
 guiAnim.start();
