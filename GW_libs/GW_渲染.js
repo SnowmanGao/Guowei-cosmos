@@ -8,7 +8,9 @@ var msOverType = undefined;
 //鼠标下的物体的对应物理对象
 var msOverObj = {};
 var 选中图形列 = [];
-var 预设配色 = ['#cff09e', '#00dffc', '#ffc952', '#f6ea8c', '#F0E5DE', '#D499B9']
+var 预设配色 = ['##44633F', '#DE6449', '#D499B9',
+    '#1f4e5f', '#79bd9a', '#f26d5b',
+]
 
 //------舞台------
 var 舞台 = new Konva.Stage({
@@ -21,6 +23,7 @@ var 舞台 = new Konva.Stage({
 });
 舞台.on('mouseover', function () {
     isMsOverCanvas = true;
+    画布容器.focus();
 });
 舞台.on('mouseout', function () {
     isMsOverCanvas = false;
@@ -28,7 +31,12 @@ var 舞台 = new Konva.Stage({
 var 画布容器 = 舞台.container();
 画布容器.tabIndex = 1;
 画布容器.focus();
+画布容器.addEventListener('keydown', function (e) {
 
+    按键处理(e);
+    
+    舞台.batchDraw();
+});
 
 
 //------图层------
@@ -60,7 +68,7 @@ var focusText = new Konva.Text({
     fontFamily: 'consolas',
     fontSize: 22,
     text: '',
-    fill: 'green',
+    fill: '#D7FFF1',
 });
 var pointerArrow = new Konva.Arrow({
     x: 0,
@@ -79,7 +87,8 @@ var massCenterStar = new Konva.Star({
     numPoints: 5,
     innerRadius: 2,
     outerRadius: 4,
-    fill: 'red',
+    fill: '#f00',
+    opacity: 0.5
 })
 
 图层_界面.add(posText);
@@ -122,6 +131,13 @@ function 更新物体位矢箭头() {
         obj.attrs.位矢箭头.points(
             [0, 0, obj.attrs.物理对象.位置.x, obj.attrs.物理对象.位置.y]
         )
+        if (obj.attrs.物理对象.物类 == 物类枚举.质点) {
+            obj.attrs.速度箭头.x(obj.attrs.物理对象.位置.x);
+            obj.attrs.速度箭头.y(obj.attrs.物理对象.位置.y);
+            obj.attrs.速度箭头.points(
+                [0, 0, obj.attrs.物理对象.速度.x * 50, obj.attrs.物理对象.速度.y * 50]
+            )
+        }
     })
 }
 
@@ -129,6 +145,19 @@ function 更新质心渲染() {
     let tempVec = 计算质心(万物);
     massCenterStar.x(tempVec.x);
     massCenterStar.y(tempVec.y);
+}
+
+function 更新物体位置() {
+    //分离供单独使用
+    万物.forEach((ele)=>{
+        ele.渲染对象.x(ele.位置.x);
+        ele.渲染对象.y(ele.位置.y);
+    })
+    诸场.forEach((ele)=>{
+        ele.渲染对象.x(ele.位置.x);
+        ele.渲染对象.y(ele.位置.y);
+    })
+
 }
 
 
@@ -144,18 +173,34 @@ var guiAnim = new Konva.Animation(function () {
     }
 
     显示鼠标位矢();
+
     //显示鼠标悬停物体信息
     switch (msOverType) {
         case 物类枚举.质点:
-            focusText.fill('green');
+            focusText.fill('#5A9367');
             let temp = fixInfo(msOverObj);
+
+            //万有引力G
             let force_G = 计算合加速度_万有引力(msOverObj);
+            let force_G_text = '';
+            if (!force_G.为零向量()) {
+                force_G_text = `-> 万有引力G = (${force_G.x.toFixed(2)}, ${force_G.y.toFixed(2)})`;
+            }
+
+            //电场力F_e
+            let force_E = 计算合加速度_电场力(msOverObj);
+            let force_E_text = '';
+            if (!force_E.为零向量()) {
+                force_E_text = `-> 电场力F_e = (${force_E.x.toFixed(2)}, ${force_E.y.toFixed(2)})`;
+            }
+
             focusText.text(
                 `(圆形)质点 [id:${temp[5]}]  
    *    质量m = ${temp[6]}
-        位矢r = (${temp[0]}, ${temp[1]})  
+        位矢r = (${temp[0]}, ${temp[1]})
         速度v = (${temp[2]}, ${temp[3]})
-  -> 万有引力G = (${force_G.x.toFixed(2)}, ${force_G.y.toFixed(2)})
+  ${force_G_text}
+  ${force_E_text}
             `
             );
             if (!为运行中) {
@@ -165,7 +210,7 @@ var guiAnim = new Konva.Animation(function () {
             break;
 
         case 物类枚举.电场:
-            focusText.fill('#d62a9d');
+            focusText.fill('#DE6449');
             focusText.text(
                 `(圆形)电场 [id:${msOverObj.id}]  
    *    场强E = (${msOverObj.场强.x}, ${msOverObj.场强.y})  

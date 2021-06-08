@@ -134,6 +134,12 @@ class 向量2 {
 
     };
 
+    为零向量() {
+
+        return ((this.x===0) && (this.y===0));
+
+    };
+
     加和(v) {
 
         this.x += v.x;
@@ -356,6 +362,9 @@ class 质点 {
         if (this.渲染对象.attrs.位矢箭头 !== undefined) {
             this.渲染对象.attrs.位矢箭头.destroy();
         }
+        if (this.渲染对象.attrs.速度箭头 !== undefined) {
+            this.渲染对象.attrs.速度箭头.destroy();
+        }
         var destroyTween = new Konva.Tween({
             node: this.渲染对象,
             duration: 0.5,
@@ -389,7 +398,7 @@ class 质点 {
             // sides: 0, ??wtf
             radius: this.样式.半径,
             fill: this.样式.颜色,
-            stroke: '#000',
+            stroke: 'black',
             strokeWidth: 1,
             opacity: 0.5,
             draggable: 'true',
@@ -478,6 +487,13 @@ function 切换物体选中状态(obj) {
 
         obj.attrs.为选中 = false;
         obj.attrs.位矢箭头.destroy();
+        obj.attrs.速度箭头.destroy();
+        for (var i = 0; i < 选中图形列.length; i++) {
+            if (选中图形列[i].id == obj.id) {
+                选中图形列.splice(i, 1);
+            }
+        }
+        
 
     } else {
 
@@ -488,13 +504,26 @@ function 切换物体选中状态(obj) {
             points: [0, 0, 0, -1],
             pointerLength: 8,
             pointerWidth: 6,
-            fill: 'red',
-            stroke: 'red',
+            fill: '#1f4e5f',
+            stroke: '#1f4e5f',
             strokeWidth: 2,
-            opacity: 0.5,
+            opacity: 0.7,
+        });
+        var objVelArrow = new Konva.Arrow({
+            x: 0,
+            y: 0,
+            points: [0, 0, 0, -1],
+            pointerLength: 8,
+            pointerWidth: 6,
+            fill: '#79bd9a',
+            stroke: '#79bd9a',
+            strokeWidth: 2,
+            opacity: 1,
         });
         obj.attrs.位矢箭头 = objPosArrow;
+        obj.attrs.速度箭头 = objVelArrow;
         图层_界面.add(objPosArrow);
+        图层_界面.add(objVelArrow);
         obj.strokeWidth(3);
         obj.stroke(obj.attrs.fill);
         obj.attrs.为选中 = true;
@@ -597,10 +626,10 @@ class 电场 {
                     focusText.text('');
                 })
 
-                circle.on('dragmove', function () {
-                    this.attrs.物理对象.位置.x = this.attrs.x;
-                    this.attrs.物理对象.位置.y = this.attrs.y;
-                })
+                // circle.on('dragmove', function () {
+                //     this.attrs.物理对象.位置.x = this.attrs.x;
+                //     this.attrs.物理对象.位置.y = this.attrs.y;
+                // })
 
                 circle.on('click', function () {
                     切换物体选中状态(this);
@@ -673,7 +702,6 @@ function 计算合加速度_电场力(self) {
 
     return tempVec;
 }
-
 
 
 function 下一帧() {

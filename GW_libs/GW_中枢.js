@@ -1,8 +1,6 @@
 var nowID = 1;
 var 为运行中 = false;
 var 时间步长 = 1
-// var 万物 = new Set();
-// var 诸场 = new Set();
 
 var 万物 = [];
 var 诸场 = [];
@@ -10,14 +8,21 @@ var 寰宇, everything = {
     '万物': 万物,
     '诸场': 诸场
 };
+// var fzc = new 矩阵3();
+var fzc = new 向量2(115114, 115114)
+
+var 速度上限 = 100,
+    初始质点数 = 3;
+
 
 const _默认样式 = {
     颜色: '#cff09e',
     半径: 10,
 }
 
-var 速度上限 = 100,
-    初始质点数 = 3;
+//上下左右
+var 默认调整步长 = 10;
+
 
 
 //禁止页面滑动
@@ -67,6 +72,76 @@ function sets() {
 
 }
 
+function 按键处理(e) {
+
+    // console.log(e);
+
+    let delta = 默认调整步长;
+    if (e.ctrlKey) {
+        delta *= 5
+    }
+    if (e.shiftKey) {
+        delta /= 10
+    }
+
+    switch (e.code) {
+        case "ArrowLeft":
+            选中图形列.forEach(ele => {
+                ele.attrs.物理对象.位置.x -= delta
+            });
+            break;
+        case 'ArrowUp':
+            选中图形列.forEach(ele => {
+                ele.attrs.物理对象.位置.y -= delta
+            });
+            break;
+        case "ArrowRight":
+            选中图形列.forEach(ele => {
+                ele.attrs.物理对象.位置.x += delta
+            });
+            break;
+        case "ArrowDown":
+            选中图形列.forEach(ele => {
+                ele.attrs.物理对象.位置.y += delta
+            });
+            break;
+        case "KeyC":
+            选中图形列.forEach(ele => {
+                ele.x(0)
+                ele.y(0)
+            });
+            break;
+        case "Space":
+            切换模拟状态();
+            break;
+        case "Enter":
+            下一帧();
+            break;
+        case "KeyA":
+            if (e.shiftKey) {
+                诸场.forEach((ele) => {
+                    ele.渲染对象.fire('click');
+                    更新物体位矢箭头();
+                })
+            }
+            if (e.ctrlKey) {
+                万物.forEach((ele) => {
+                    ele.渲染对象.fire('click');
+                    更新物体位矢箭头();
+                })
+            }
+            break;
+        case "Delete":
+            选中图形列.forEach((ele) => {
+                ele.物理对象.销毁();
+            })
+        default:
+            break;
+    }
+    更新物体位置();
+    更新物体位矢箭头();
+    e.preventDefault();
+}
 
 /**------------------------------------------- */
 
@@ -78,7 +153,7 @@ function 初始化() {
     MOD_载入完成时执行();
 
     更新质心渲染();
-    
+
 }
 
 
