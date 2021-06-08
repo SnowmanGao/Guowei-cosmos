@@ -722,8 +722,8 @@ function 下一帧() {
         }
 
         //微分合并
-        self.速度.加和(self.加速度);
-        self.位置.加和(self.速度);
+        self.速度.加和(self.加速度.求数乘(时间步长));
+        self.位置.加和(self.速度.求数乘(时间步长));
 
         self.渲染对象.x(self.位置.x);
         self.渲染对象.y(self.位置.y);

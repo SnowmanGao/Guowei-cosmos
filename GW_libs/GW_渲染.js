@@ -211,6 +211,6 @@ function 主动画函数() {
     更新质心渲染();
 
     //显示已逝帧数
-    frameText.text(`t = ${已逝帧数}`);
+    frameText.text(`t = ${(已逝帧数*时间步长).toFixed(0)}`);
 
 }
