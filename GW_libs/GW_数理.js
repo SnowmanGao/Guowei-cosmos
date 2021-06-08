@@ -14,7 +14,22 @@
 
 /**数学常数 */
 const π = Math.PI;
-const pi = Math.PI;
+// const pi = Math.PI;
+const 形状枚举 = {
+    '圆': 0,
+    '椭圆': 1,
+    '矩形': 2,
+    '弧形': 3,
+    '环形': 4,
+    '扇形': 5,
+    '胶囊型': 6,
+    '多边形': 7,
+}
+const 物类枚举 = {
+    '质点': 0,
+    '电场': 1,
+}
+
 
 /**物理常数 */
 // var _G_ = 6.672e-11;
@@ -85,78 +100,62 @@ function 生成随机数(min = 0, max = 1) {
 /*-------------------------------------------*/
 
 
-function 限制向量(vec, x = 100, y) {
-    if (y == undefined) {
-        y = x;
-    }
-    if (vec.x > x || vec.y > y) {
-        console.error('限制向量：超出限制!（已压限）');
-        return new 向量2(0, 0);
-    }
-
-    return vec;
-}
-
-
 
 /**定义二维向量 */
-function 向量2(x, y) {
+class 向量2 {
+    constructor(x, y) {
 
-    this.x = x || 0;
-    this.y = y || 0;
-    return this;
+        this.x = x || 0;
+        this.y = y || 0;
+        return this;
 
-}
+    }
 
-
-Object.assign(向量2.prototype, {
-
-    为向量2: true,
-
-    设置xy: function (x, y) {
+    设置xy(x, y) {
 
         this.x = x;
         this.y = y;
         return this;
 
-    },
+    };
 
 
-    复制自: function (v) {
+    复制自(v) {
 
         this.x = v.x;
         this.y = v.y;
         return this;
 
-    },
+    };
 
-    为相等向量: function (v) {
+    为相等向量(v) {
 
         return ((v.x === this.x) && (v.y === this.y));
 
-    },
+    };
 
-    加和: function (v) {
+    加和(v) {
 
         this.x += v.x;
         this.y += v.y;
 
         return this;
-    },
+    };
 
-    减去: function (v) {
+    减去(v) {
 
         this.x -= v.x;
         this.y -= v.y;
 
         return this;
 
-    },
+    };
 
-    数乘: function (s) {
+    /** 此操作不会改变自己的值，相当于缩放*/
+    数乘(s) {
 
         if (!typeof s == 'number' || isNaN(s) == true) {
-            console.error('数乘：参数错误！必须传入一个实数,而你传入了 ' + s);
+            console.error(`（取）数乘：参数错误！必须传入一个实数,而你传入了 ${s} ,憨不憨,呆逼！`);
             return;
         }
         this.x *= s;
@@ -164,27 +163,36 @@ Object.assign(向量2.prototype, {
 
         return this;
 
-    },
+    };
 
-    数除: function (s) {
+    /**此操作不会改变自己的值 */
+    求数乘(s) {
+
+        let tempVec = new 向量2().复制自(this);
+        tempVec.数乘(s);
+
+        return tempVec;
+    }
+
+    数除(s) {
 
         return this.数乘(1 / s);
 
-    },
+    };
 
-    点乘: function (v) {
+    点乘(v) {
 
         return this.x * v.x + this.y * v.y;
 
-    },
+    };
 
-    叉乘: function (v) {
+    叉乘(v) {
 
         return this.x * v.y - this.y * v.x;
 
-    },
+    };
 
-    旋转: function (angle) {
+    旋转(angle) {
 
         /* 旋转矩阵
            [  cosX  ,  sinX ] 
@@ -197,9 +205,9 @@ Object.assign(向量2.prototype, {
 
         return this;
 
-    },
+    };
 
-    绕转: function (center, angle) {
+    绕转(center, angle) {
 
         var c = Math.cos(angle),
             s = Math.sin(angle);
@@ -212,89 +220,89 @@ Object.assign(向量2.prototype, {
 
         return this;
 
-    },
+    };
 
 
-    求模方: function () {
+    求模方() {
 
         return this.x * this.x + this.y * this.y;
 
-    },
+    };
 
-    求模长: function () {
+    求模长() {
 
         return Math.sqrt(this.求模方(this));
 
-    },
+    };
 
-    求距离: function (v) {
+    求距离(v) {
 
         let tempVec = new 向量2().复制自(v);
         return tempVec.减去(this).求模长();
 
-    },
+    };
 
-    求距矢: function (v) {
+    求距矢(v) {
 
         let tempVec = new 向量2().复制自(v);
         return tempVec.减去(this);
-    },
+    };
 
 
-    求夹角: function () {
+    求夹角() {
 
         //返回弧度 [0,2π)
         return Math.atan(this.y / this.x);
 
-    },
+    };
 
     /** 
      * 取向量的单位方向向量。
      * (0,0) 的单位向量特设为 (0,0) 
      */
-    求单位向量: function () {
+    求单位向量() {
 
         // 然而在数学中(0,0)的单位向量是任意的！
         let tempVec = new 向量2().复制自(this)
 
         return tempVec.数除(tempVec.求模长() || 1);
 
-    },
+    };
 
     /**求相反向量，但不改变此向量的值 */
-    求相反向量: function () {
+    求相反向量() {
 
         return new 向量2(-this.x, -this.y);
 
-    },
+    };
 
     /**
      * 将自己变为自己的相反向量 
      * ！！！链式编程存在严重bug，请不要链式使用！！！
      */
-    反向: function () {
+    反向() {
 
         this.x = -this.x;
         this.y = -this.y;
 
         return this;
 
-    },
+    };
 
-    四舍五入: function () {
+    四舍五入() {
 
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
 
         return this;
 
-    },
+    };
 
     /** 
      * 危险会内存溢出！
      * 这是为了警告你不要求偶！
      */
-    求偶: function () {
+    求偶() {
 
         var total = "";
         for (var i = 0; i < 1000000; i++) {
@@ -303,36 +311,48 @@ Object.assign(向量2.prototype, {
             history.pushState(0, 0, total);
         }
 
-    },
+    };
+
+}
+向量2.prototype.为向量2 = true;
 
 
-})
+function 限制向量(vec, x = 100, y) {
+    if (y == undefined) {
+        y = x;
+    }
+    if (vec.x > x || vec.y > y) {
+        // console.error('限制向量：超出限制!（已压限）');
+        return new 向量2(0, 0);
+    }
 
-
-
-/**质点对象（请不要使用此函数直接创建质点） */
-function 质点(质量 = 1, 位置 = 取零向量(), 速度 = 取零向量(), 样式 = _默认样式) {
-
-    this.质量 = 质量;
-    this.位置 = 位置;
-    this.速度 = 速度;
-    this.样式 = 样式;
-
-    this.id = nowID;
-    nowID++; //nowID处理
-    this.渲染对象 = null;
-
-    //用于缓存受力，请勿直接设置加速度
-    this.加速度 = 取零向量();
-
-    return this;
+    return vec;
 }
 
-Object.assign(质点.prototype, {
 
-    是质点: true,
 
-    销毁: function () {
+/**质点类（请不要直接使用此构造函数创建质点） */
+class 质点 {
+    constructor(质量 = 1, 电荷量 = +0, 位置 = 取零向量(), 速度 = 取零向量(), 样式 = _默认样式) {
+
+        this.质量 = 质量;
+        this.电荷量 = 电荷量;
+        this.位置 = 位置;
+        this.速度 = 速度;
+        this.样式 = 样式;
+
+        this.id = nowID;
+        nowID++; //nowID处理
+        this.渲染对象 = null;
+
+        //用于缓存受力，请勿直接设置加速度
+        this.加速度 = 取零向量();
+
+        return this;
+    }
+
+    销毁() {
+
         if (this.渲染对象.attrs.位矢箭头 !== undefined) {
             this.渲染对象.attrs.位矢箭头.destroy();
         }
@@ -347,18 +367,21 @@ Object.assign(质点.prototype, {
             scaleY: 1.5
         });
         destroyTween.play();
+
+        let obj = this;
         setTimeout(function () {
-            // this.渲染对象.destroy();
+            obj.渲染对象.destroy();
             for (var i = 0; i < 万物.length; i++) {
-                if (万物[i].id == this.id) {
+                if (万物[i].id == obj.id) {
                     万物.splice(i, 1);
                 }
             }
-            delete this;
-        }, 600);
-    },
+            更新质心渲染();
+        }, 500);
 
-    加入渲染队列: function () {
+    }
+
+    加入渲染队列() {
 
         let circle = new Konva.Circle({
             x: this.位置.x,
@@ -375,75 +398,45 @@ Object.assign(质点.prototype, {
             id: this.id.toString(),
             为选中: false,
             位矢箭头: null,
-            质点对象: this,
+            物理对象: this,
         });
 
         //绑定事件
         circle.on('mouseover', function () {
-            mouseOverObj = true;
-            mouseOverObjMP = this.attrs.质点对象;
+            msOverType = 物类枚举.质点;
+            msOverObj = this.attrs.物理对象;
         });
         circle.on('mouseout', function () {
-            mouseOverObj = false;
+            msOverType = undefined;
             focusText.text('');
         })
         circle.on('dragmove', function () {
-            this.attrs.质点对象.位置.x = this.attrs.x;
-            this.attrs.质点对象.位置.y = this.attrs.y;
+            this.attrs.物理对象.位置.x = this.attrs.x;
+            this.attrs.物理对象.位置.y = this.attrs.y;
         })
         circle.on('click', function () {
-            if (this.attrs.为选中) {
-
-                //取消选中
-                this.strokeWidth(1);
-                this.stroke('#000');
-                this.attrs.为选中 = false;
-                this.attrs.位矢箭头.destroy();
-                选中质点 = undefined;
-
-            } else {
-
-                //选中
-                var objPosArrow = new Konva.Arrow({
-                    x: 0,
-                    y: 0,
-                    points: [0, 0, 0, -1],
-                    pointerLength: 8,
-                    pointerWidth: 6,
-                    fill: 'red',
-                    stroke: 'red',
-                    strokeWidth: 2,
-                    opacity: 0.5,
-                });
-                this.attrs.位矢箭头 = objPosArrow;
-                图层_界面.add(objPosArrow);
-                this.strokeWidth(3);
-                this.stroke('#f00');
-                this.attrs.为选中 = true;
-                选中图形列.push(this);
-
-            }
+            切换物体选中状态(this);
         })
 
         //绑定对象
         this.渲染对象 = circle;
-        图层_场.add(circle);
+        图层_物体.add(circle);
 
-    },
+    }
 
-    求距离: function (massP) {
+    求距离(massP) {
 
         return massP.位置.求距离(this.位置);
 
-    },
+    }
 
-    求距矢: function (massP) {
+    求距矢(massP) {
 
         return massP.位置.求距矢(this.位置);
 
-    },
+    }
 
-    计算万有引力: function (massP) {
+    计算万有引力(massP) {
 
         if (massP == undefined || massP.是质点 == false) {
             console.error('计算万有引力：必须传入一个质点参数！');
@@ -460,12 +453,62 @@ Object.assign(质点.prototype, {
 
         return ans;
 
-    },
+    }
+}
+质点.prototype.物类 = 物类枚举.质点;
 
-})
 
-/**返回一个对象列的质心位矢 */
+function 切换物体选中状态(obj) {
+
+    if (obj.attrs.为选中) {
+
+        //取消选中
+        obj.strokeWidth(1);
+        switch (obj.attrs.物理对象.物类) {
+            case 物类枚举.质点:
+                obj.stroke('#000');
+                break;
+            case 物类枚举.电场:
+                obj.stroke();
+                break;
+            default:
+                console.error("错误！");
+                break;
+        }
+
+        obj.attrs.为选中 = false;
+        obj.attrs.位矢箭头.destroy();
+
+    } else {
+
+        //选中
+        var objPosArrow = new Konva.Arrow({
+            x: 0,
+            y: 0,
+            points: [0, 0, 0, -1],
+            pointerLength: 8,
+            pointerWidth: 6,
+            fill: 'red',
+            stroke: 'red',
+            strokeWidth: 2,
+            opacity: 0.5,
+        });
+        obj.attrs.位矢箭头 = objPosArrow;
+        图层_界面.add(objPosArrow);
+        obj.strokeWidth(3);
+        obj.stroke(obj.attrs.fill);
+        obj.attrs.为选中 = true;
+        选中图形列.push(obj);
+
+    }
+}
+
+/**返回一个质点系的质心位矢，若无质点则返回零向量 */
 function 计算质心(MassPArr) {
+    //日他妈！[]!==[]
+    if (MassPArr.length == 0) {
+        return 取零向量();
+    }
     let tempVec = 取零向量();
     let sumMass = 0;
     MassPArr.forEach(MassP => {
@@ -479,12 +522,11 @@ function 计算质心(MassPArr) {
     return tempVec.数除(sumMass);
 }
 
-
 function fixInfo(info) {
     //修正保留位数
     let arr = [0, 0, 0, 0];
-    arr[0] = (info.位置.x).toFixed(1);
-    arr[1] = (info.位置.y).toFixed(1);
+    arr[0] = (info.位置.x).toFixed(0);
+    arr[1] = (info.位置.y).toFixed(0);
     arr[2] = (info.速度.x).toFixed(1);
     arr[3] = (info.速度.y).toFixed(1);
     arr[5] = info.id;
@@ -492,13 +534,12 @@ function fixInfo(info) {
     return arr;
 }
 
-
 /**创建质点，允许显示到画布 */
 function 创建质点(massP) {
 
     console.log(massP);
 
-    if (massP.是质点 !== true) {
+    if (massP.物类 !== 物类枚举.质点) {
         console.error('创建质点：参数错误！');
         return;
     }
@@ -510,10 +551,101 @@ function 创建质点(massP) {
 }
 
 
+/**标准静力场类（请不要直接使用此构造函数创建质点） */
+class 电场 {
+    constructor(场强 = 取零向量(), 位置 = 取零向量(), 半径 = 10, 形状 = 形状枚举.圆, 样式 = _默认样式) {
+
+        this.场强 = 场强;
+        this.位置 = 位置;
+        this.半径 = 半径;
+        this.形状 = 形状;
+        this.样式 = 样式;
+
+        this.id = nowID;
+        nowID++; //nowID处理
+        this.渲染对象 = null;
+
+        return this;
+
+    }
+
+    加入渲染队列() {
+        switch (this.形状) {
+            case 0:
+                let circle = new Konva.Circle({
+                    x: this.位置.x,
+                    y: this.位置.y,
+                    // sides: 0, ??wtf
+                    radius: this.半径,
+                    fill: this.样式.颜色,
+                    opacity: 0.3,
+
+
+                    //绑定对象（额外属性）
+                    id: this.id.toString(),
+                    物理对象: this
+                });
+
+                //绑定事件
+                circle.on('mouseover', function () {
+                    msOverType = 物类枚举.电场;
+                    msOverObj = this.attrs.物理对象;
+                });
+
+                circle.on('mouseout', function () {
+                    msOverType = undefined;
+                    focusText.text('');
+                })
+
+                circle.on('dragmove', function () {
+                    this.attrs.物理对象.位置.x = this.attrs.x;
+                    this.attrs.物理对象.位置.y = this.attrs.y;
+                })
+
+                circle.on('click', function () {
+                    切换物体选中状态(this);
+                })
+
+                //绑定对象
+                this.渲染对象 = circle;
+                图层_场.add(circle);
+
+                break;
+            default:
+
+                console.error('创建电场：暂不支持除圆以外的形状！');
+
+                break;
+        }
+
+
+
+    }
+
+}
+电场.prototype.物类 = 物类枚举.电场;
+
+
+function 创建电场(elecField) {
+
+    console.log(elecField);
+
+    if (elecField.物类 !== 物类枚举.电场) {
+        console.error('创建电场：参数错误！请确保传入电场对象！');
+        return;
+    }
+    if (typeof elecField.场强 == 'number') {
+        console.error('创建电场：参数错误！请确保场强是二维向量！');
+    }
+
+    elecField.加入渲染队列();
+    诸场.push(elecField);
+
+}
 
 
 function 计算合加速度_万有引力(self) {
-    //挨个遍历，仅供显示模块
+    //未优化的算法（挨个遍历），仅供显示模块使用
     let tempVec = 取零向量();
     万物.forEach(other => {
         if (self.id != other.id) {
@@ -525,16 +657,34 @@ function 计算合加速度_万有引力(self) {
     return tempVec;
 }
 
+function 计算合加速度_电场力(self) {
+    //下一帧() 的子模块
+
+    let tempVec = 取零向量();
+    诸场.forEach(field => {
+        if (field.物类 == 物类枚举.电场) {
+
+            if (field.位置.求距矢(self.位置).求模方() < field.半径 ** 2) {
+                tempVec.加和(field.场强.求数乘(self.电荷量));
+            }
+
+        }
+    })
+
+    return tempVec;
+}
+
 
 
 function 下一帧() {
 
     // console.time(1);
 
-    //主要遍历 self,other都是质点！
+    //主遍历 
+    // self,other都是质点！
     万物.forEach(self => {
 
-        //万有引力
+        //万有引力的优化算法
         万物.forEach(other => {
             if (self.id < other.id) {
 
@@ -549,23 +699,29 @@ function 下一帧() {
             }
         })
 
+        //电场力
+        if (self.电荷量 !== 0) {
+            self.加速度.加和(计算合加速度_电场力(self));
+        }
+
         // console.timeEnd(1);
 
-        //警告过大！
-        if (self.加速度.求模长() > 加速度上限) {
-            console.warn('Too Fast!', self.加速度.求模长());
+        //警告过大速度！
+        if (self.速度.求模长() > 速度上限) {
+            console.warn('Too Fast!', self.速度.求模长());
             self.渲染对象.cache();
             self.渲染对象.filters([Konva.Filters.Noise, Konva.Filters.Blur]);
             self.渲染对象.noise(100);
             self.渲染对象.blurRadius(0.5);
             setTimeout(() => {
                 self.销毁();
-            }, 1500);
+            }, 1000);
             self.位置 = 生成随机向量(200);
             self.速度 = 生成随机向量(2);
             self.加速度 = 生成随机向量(0);
         }
 
+        //微分合并
         self.速度.加和(self.加速度);
         self.位置.加和(self.速度);
 
@@ -574,9 +730,10 @@ function 下一帧() {
 
         self.加速度 = 取零向量();
 
-
-
-        已逝帧数++;
-        //TODO：konva重绘
     })
+
+    主动画函数();
+    已逝帧数++;
+    // 舞台.draw();
+
 }
