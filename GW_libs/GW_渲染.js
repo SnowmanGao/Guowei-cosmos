@@ -34,7 +34,7 @@ var 画布容器 = 舞台.container();
 画布容器.addEventListener('keydown', function (e) {
 
     按键处理(e);
-    
+
     舞台.batchDraw();
 });
 
@@ -149,11 +149,11 @@ function 更新质心渲染() {
 
 function 更新物体位置() {
     //分离供单独使用
-    万物.forEach((ele)=>{
+    万物.forEach((ele) => {
         ele.渲染对象.x(ele.位置.x);
         ele.渲染对象.y(ele.位置.y);
     })
-    诸场.forEach((ele)=>{
+    诸场.forEach((ele) => {
         ele.渲染对象.x(ele.位置.x);
         ele.渲染对象.y(ele.位置.y);
     })
@@ -194,19 +194,28 @@ var guiAnim = new Konva.Animation(function () {
                 force_E_text = `-> 电场力F_e = (${force_E.x.toFixed(2)}, ${force_E.y.toFixed(2)})`;
             }
 
+            //洛伦兹力F_l
+            let force_L = 计算合加速度_洛伦兹力(msOverObj);
+
+            let force_L_text = '';
+            if (!force_L.为零向量()) {
+                force_L_text = `-> 洛伦兹力F_l = (${force_L.x.toFixed(2)}, ${force_L.y.toFixed(2)})`;
+            }
+
             focusText.text(
                 `(圆形)质点 [id:${temp[5]}]  
    *    质量m = ${temp[6]}
         位矢r = (${temp[0]}, ${temp[1]})
         速度v = (${temp[2]}, ${temp[3]})
   ${force_G_text}
-  ${force_E_text}
-            `
+  ${force_E_text}${force_L_text}`
             );
+
             if (!为运行中) {
                 更新物体位矢箭头();
                 更新质心渲染();
             }
+
             break;
 
         case 物类枚举.电场:
@@ -219,7 +228,22 @@ var guiAnim = new Konva.Animation(function () {
             `
             );
             break;
+
+        case 物类枚举.磁场:
+            focusText.fill('#6a60a9');
+            focusText.text(
+                `(圆形)磁场 [id:${msOverObj.id}]  
+   *    场强B = ${msOverObj.场强} [${msOverObj.场强>0 ? '向外':'向里'}]
+        位矢r = (${msOverObj.位置.x}, ${msOverObj.位置.y})
+        半径R = ${msOverObj.半径}
+            `
+            );
+            break;
+
+        case undefined:
+            break;
         default:
+            console.error('guiAnim：你选中了什么东西？我TM不知道！' + msOverType);
             break;
     }
 

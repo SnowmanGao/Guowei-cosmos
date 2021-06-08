@@ -14,7 +14,11 @@
 
 /**数学常数 */
 const π = Math.PI;
-// const pi = Math.PI;
+const pi = π;
+const 二分之π = π * 0.5;
+const 四分之π = π * 0.25;
+
+/**枚举类*/
 const 形状枚举 = {
     '圆': 0,
     '椭圆': 1,
@@ -25,16 +29,27 @@ const 形状枚举 = {
     '胶囊型': 6,
     '多边形': 7,
 }
+
 const 物类枚举 = {
     '质点': 0,
     '电场': 1,
+    '磁场': 2,
+}
+
+const 方向枚举 = {
+    //特殊的方向
+    '向里': -1,
+    '×': -1,
+    'I': -1,
+    '向外': 1,
+    '.': 1,
+    'O': 1
 }
 
 
 /**物理常数 */
 // var _G_ = 6.672e-11;
 var _G_ = 5
-// var _g_ = 9.8;
 
 
 function 到弧度(deg) {
@@ -136,7 +151,7 @@ class 向量2 {
 
     为零向量() {
 
-        return ((this.x===0) && (this.y===0));
+        return ((this.x === 0) && (this.y === 0));
 
     };
 
@@ -157,7 +172,7 @@ class 向量2 {
 
     };
 
-    /** 此操作不会改变自己的值，相当于缩放*/
+    /** 此操作会改变自己的值，相当于缩放*/
     数乘(s) {
 
         if (!typeof s == 'number' || isNaN(s) == true) {
@@ -480,8 +495,11 @@ function 切换物体选中状态(obj) {
             case 物类枚举.电场:
                 obj.stroke();
                 break;
+            case 物类枚举.磁场:
+                obj.stroke();
+                break;
             default:
-                console.error("错误！");
+                console.error("切换物体选中状态：错误的物类！");
                 break;
         }
 
@@ -493,7 +511,7 @@ function 切换物体选中状态(obj) {
                 选中图形列.splice(i, 1);
             }
         }
-        
+
 
     } else {
 
@@ -528,6 +546,7 @@ function 切换物体选中状态(obj) {
         obj.stroke(obj.attrs.fill);
         obj.attrs.为选中 = true;
         选中图形列.push(obj);
+        更新物体位矢箭头();
 
     }
 }
@@ -580,7 +599,7 @@ function 创建质点(massP) {
 }
 
 
-/**标准静力场类（请不要直接使用此构造函数创建质点） */
+/**【狭义电场】标准静力场类（请不要直接使用此构造函数创建质点） */
 class 电场 {
     constructor(场强 = 取零向量(), 位置 = 取零向量(), 半径 = 10, 形状 = 形状枚举.圆, 样式 = _默认样式) {
 
@@ -626,11 +645,6 @@ class 电场 {
                     focusText.text('');
                 })
 
-                // circle.on('dragmove', function () {
-                //     this.attrs.物理对象.位置.x = this.attrs.x;
-                //     this.attrs.物理对象.位置.y = this.attrs.y;
-                // })
-
                 circle.on('click', function () {
                     切换物体选中状态(this);
                 })
@@ -643,7 +657,6 @@ class 电场 {
             default:
 
                 console.error('创建电场：暂不支持除圆以外的形状！');
-
                 break;
         }
 
@@ -654,7 +667,6 @@ class 电场 {
 }
 电场.prototype.物类 = 物类枚举.电场;
 
-
 function 创建电场(elecField) {
 
     console.log(elecField);
@@ -664,13 +676,103 @@ function 创建电场(elecField) {
         return;
     }
     if (typeof elecField.场强 == 'number') {
-        console.error('创建电场：参数错误！请确保场强是二维向量！');
+        console.error('创建电场：参数错误！请确保电场强度是 二维向量！');
+        return;
     }
 
     elecField.加入渲染队列();
     诸场.push(elecField);
 
 }
+
+
+/** 【狭义磁场】物体可能会受到洛伦兹力*/
+class 磁场 {
+    constructor(场强 = 0, 位置 = 取零向量(), 半径 = 10, 形状 = 形状枚举.圆, 样式 = _默认样式) {
+
+        this.场强 = 场强;
+        this.位置 = 位置;
+        this.半径 = 半径;
+        this.形状 = 形状;
+        this.样式 = 样式;
+
+        this.id = nowID;
+        nowID++; //nowID处理
+        this.渲染对象 = null;
+
+        return this;
+
+    }
+
+    加入渲染队列() {
+        switch (this.形状) {
+            case 0:
+                let circle = new Konva.Circle({
+                    x: this.位置.x,
+                    y: this.位置.y,
+                    // sides: 0, ??wtf
+                    radius: this.半径,
+                    fill: this.样式.颜色,
+                    opacity: 0.3,
+
+
+                    //绑定对象（额外属性）
+                    id: this.id.toString(),
+                    物理对象: this
+                });
+
+                //绑定事件
+                circle.on('mouseover', function () {
+                    msOverType = 物类枚举.磁场;
+                    msOverObj = this.attrs.物理对象;
+                });
+
+                circle.on('mouseout', function () {
+                    msOverType = undefined;
+                    focusText.text('');
+                })
+
+                circle.on('click', function () {
+                    切换物体选中状态(this);
+                })
+
+                //绑定对象
+                this.渲染对象 = circle;
+                图层_场.add(circle);
+
+                break;
+            default:
+
+                console.error('创建磁场：暂不支持除圆以外的形状！');
+                break;
+        }
+
+
+
+    }
+
+}
+磁场.prototype.物类 = 物类枚举.磁场;
+
+function 创建磁场(magnetField) {
+
+    console.log(magnetField);
+
+    if (magnetField.物类 !== 物类枚举.磁场) {
+        console.error('创建磁场：参数错误！请确保传入磁场对象！');
+        return;
+    }
+    if (typeof magnetField.场强 !== 'number') {
+        console.error('创建磁场：参数错误！请确保磁场强度是 实数！');
+        return;
+    }
+
+    magnetField.加入渲染队列();
+    诸场.push(magnetField);
+
+}
+
+
 
 
 function 计算合加速度_万有引力(self) {
@@ -694,6 +796,7 @@ function 计算合加速度_电场力(self) {
         if (field.物类 == 物类枚举.电场) {
 
             if (field.位置.求距矢(self.位置).求模方() < field.半径 ** 2) {
+                //求电场力
                 tempVec.加和(field.场强.求数乘(self.电荷量));
             }
 
@@ -702,6 +805,30 @@ function 计算合加速度_电场力(self) {
 
     return tempVec;
 }
+
+function 计算合加速度_洛伦兹力(self) {
+    //下一帧() 的子模块
+    let vel = 取零向量();
+    诸场.forEach(field => {
+        if (field.物类 == 物类枚举.磁场) {
+
+            if (field.位置.求距矢(self.位置).求模方() < field.半径 ** 2) {
+
+                //求洛伦兹力
+                vel.复制自(self.速度)
+                    .旋转(四分之π * (field.场强 > 0 ? 1 : -1))
+                    .数乘(self.电荷量 * field.场强);
+                //新的vel已经变成力了！
+
+                return vel;
+            }
+
+        }
+    })
+
+    return vel;
+}
+
 
 
 function 下一帧() {
@@ -730,6 +857,7 @@ function 下一帧() {
         //电场力
         if (self.电荷量 !== 0) {
             self.加速度.加和(计算合加速度_电场力(self));
+            self.加速度.加和(计算合加速度_洛伦兹力(self));
         }
 
         // console.timeEnd(1);
