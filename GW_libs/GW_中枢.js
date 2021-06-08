@@ -49,16 +49,27 @@ function 切换模拟状态() {
 }
 
 function test() {
-    let arr = [];
+    let arr = {};
+    let arr2 = {};
     万物.forEach(ele => {
-        arr.push({
-            'id': ele.id,
-            'mass': ele.质量,
+        arr[ele.id] = {
+            '质量': ele.质量,
             'x': ele.位置.x,
             'y': ele.位置.y
-        })
+        }
     })
+    诸场.forEach(ele => {
+        arr2[ele.id] = {
+            '场强大小': ele.场强.求模长(),
+            '半径': ele.半径,
+            'x': ele.位置.x,
+            'y': ele.位置.y,
+        }
+    })
+    console.group('寰宇：{质点系，场系}')
     console.table(arr);
+    console.table(arr2);
+    console.groupEnd()
 }
 
 function sets() {
@@ -67,7 +78,7 @@ function sets() {
         '时间步长': 时间步长,
         '引力常数(_G_)': _G_,
         '初始质点数': 初始质点数,
-        '加速度上限': 速度上限
+        '速度上限': 速度上限
     })
 
 }
@@ -107,8 +118,8 @@ function 按键处理(e) {
             break;
         case "KeyC":
             选中图形列.forEach(ele => {
-                ele.x(0)
-                ele.y(0)
+                console.log(ele);
+                ele.attrs.物理对象.位置 = 生成随机向量();
             });
             break;
         case "Space":
@@ -133,7 +144,7 @@ function 按键处理(e) {
             break;
         case "Delete":
             选中图形列.forEach((ele) => {
-                ele.物理对象.销毁();
+                ele.attrs.物理对象.销毁();
             })
         default:
             break;
@@ -151,6 +162,7 @@ function 初始化() {
 
     //交给mod(JavaScript代码)
     MOD_载入完成时执行();
+    test();
 
     更新质心渲染();
 

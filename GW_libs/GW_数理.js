@@ -114,7 +114,10 @@ function 生成随机数(min = 0, max = 1) {
 
 /*-------------------------------------------*/
 
-
+/**同一场强大小算法的附加方法*/
+Number.prototype.求模长 = function () {
+    return this.valueOf();
+}
 
 /**定义二维向量 */
 class 向量2 {
@@ -201,18 +204,19 @@ class 向量2 {
 
     };
 
-    点乘(v) {
+    求点乘(v) {
 
         return this.x * v.x + this.y * v.y;
 
     };
 
-    叉乘(v) {
+    求叉乘(v) {
 
         return this.x * v.y - this.y * v.x;
 
     };
 
+    /**逆时针旋转给定弧度（误差有些严重） */
     旋转(angle) {
 
         /* 旋转矩阵
@@ -221,12 +225,25 @@ class 向量2 {
         */
         let c = Math.cos(angle),
             s = Math.sin(angle);
-        this.x = this.x * c - this.y * s;
-        this.y = this.x * s + this.y * c;
+        //使用 设置xy 而非 this.x =... 是因为值的交换不同步！
+        this.设置xy(this.x * c - this.y * s, this.x * s + this.y * c);
 
         return this;
 
     };
+
+    /**传入旋转方向：若为正则顺时针，零和负则为逆时针（默认） 
+     * tips: true == 1 , false == 0
+     */
+    旋转90度(sgn = -1) {
+
+        sgn = sgn > 0 ? 1 : -1;
+        //使用 设置xy 而非 this.x =... 是因为值的交换不同步！
+        this.设置xy(sgn * this.y, -sgn * this.x)
+
+        return this;
+    }
+
 
     绕转(center, angle) {
 
@@ -256,6 +273,12 @@ class 向量2 {
 
     };
 
+    曼哈顿模长() {
+
+        return Math.abs(this.x) + Math.abs(this.y);
+
+    };
+
     求距离(v) {
 
         let tempVec = new 向量2().复制自(v);
@@ -270,18 +293,28 @@ class 向量2 {
     };
 
 
-    求夹角() {
+    求x轴夹角() {
 
         //返回弧度 [0,2π)
         return Math.atan(this.y / this.x);
 
     };
 
-    /** 
-     * 取向量的单位方向向量。
-     * (0,0) 的单位向量特设为 (0,0) 
+
+
+    /*返回单位向量，不改变自己的值
+     * (0,0) 的单位向量特设为 (0,0)
      */
     求单位向量() {
+
+        return this.数除(this.求模长() || 1);
+
+    }
+
+    /** 变为单位向量。
+     * (0,0) 的单位向量特设为 (0,0) 
+     */
+    归一化() {
 
         // 然而在数学中(0,0)的单位向量是任意的！
         let tempVec = new 向量2().复制自(this)
@@ -319,6 +352,31 @@ class 向量2 {
 
     };
 
+    模长钳制(min, max) {
+
+        var 模长 = this.求模长();
+        return this.数除(模长 || 1).数乘(Math.max(min, Math.min(max, 模长)));
+
+    };
+
+    设置模长(length) {
+
+        return this.归一化().数乘(length);
+
+    };
+
+    矩阵4变换_() {
+
+        console.error('wtf？');
+
+    }
+
+    四元数变换_() {
+
+        console.error('wtf？');
+
+    }
+
     /** 
      * 危险会内存溢出！
      * 这是为了警告你不要求偶！
@@ -337,18 +395,6 @@ class 向量2 {
 }
 向量2.prototype.为向量2 = true;
 
-
-function 限制向量(vec, x = 100, y) {
-    if (y == undefined) {
-        y = x;
-    }
-    if (vec.x > x || vec.y > y) {
-        // console.error('限制向量：超出限制!（已压限）');
-        return new 向量2(0, 0);
-    }
-
-    return vec;
-}
 
 
 
@@ -397,12 +443,13 @@ class 质点 {
             obj.渲染对象.destroy();
             for (var i = 0; i < 万物.length; i++) {
                 if (万物[i].id == obj.id) {
+                    切换物体选中状态(万物[i].渲染对象, 0);
                     万物.splice(i, 1);
                 }
             }
             更新质心渲染();
         }, 500);
-
+        console.log(`质点[id=${this.id}]已经销毁！`);
     }
 
     加入渲染队列() {
@@ -472,7 +519,7 @@ class 质点 {
         //上面这一步必要！绝对不能直接操作massP，那是引用对象！
         let tempVec = vec.求距矢(this.位置);
         let ans = tempVec
-            .求单位向量()
+            .归一化()
             .数乘(-_G_ * mass * this.质量 / tempVec.求模方());
 
         return ans;
@@ -482,7 +529,12 @@ class 质点 {
 质点.prototype.物类 = 物类枚举.质点;
 
 
-function 切换物体选中状态(obj) {
+function 切换物体选中状态(obj, tabTo = -1) {
+
+    if (tabTo >= 0) {
+        //强制切换状态 0:取消选中 1:选中
+        obj.attrs.为选中 = !tabTo;
+    }
 
     if (obj.attrs.为选中) {
 
@@ -585,8 +637,6 @@ function fixInfo(info) {
 /**创建质点，允许显示到画布 */
 function 创建质点(massP) {
 
-    console.log(massP);
-
     if (massP.物类 !== 物类枚举.质点) {
         console.error('创建质点：参数错误！');
         return;
@@ -612,6 +662,7 @@ class 电场 {
         this.id = nowID;
         nowID++; //nowID处理
         this.渲染对象 = null;
+        this.速度 = 取零向量();
 
         return this;
 
@@ -664,12 +715,45 @@ class 电场 {
 
     }
 
+    销毁() {
+
+        if (this.渲染对象.attrs.位矢箭头 !== undefined) {
+            this.渲染对象.attrs.位矢箭头.destroy();
+        }
+        if (this.渲染对象.attrs.速度箭头 !== undefined) {
+            this.渲染对象.attrs.速度箭头.destroy();
+        }
+        var destroyTween = new Konva.Tween({
+            node: this.渲染对象,
+            duration: 0.5,
+            fill: 'white',
+            rotation: Math.PI * 2,
+            opacity: 0,
+            strokeWidth: 3,
+            scaleX: 0.2,
+            scaleY: 0.2
+        });
+        destroyTween.play();
+
+        let obj = this;
+        setTimeout(function () {
+            obj.渲染对象.destroy();
+            for (var i = 0; i < 诸场.length; i++) {
+                if (诸场[i].id == obj.id) {
+                    诸场.splice(i, 1);
+                    if (诸场[i] !== undefined) {
+                        切换物体选中状态(诸场[i].渲染对象, 0);
+                    }
+                }
+            }
+            更新质心渲染();
+        }, 500);
+        console.log(`电场[id=${this.id}]已经销毁！`);
+    }
 }
 电场.prototype.物类 = 物类枚举.电场;
 
 function 创建电场(elecField) {
-
-    console.log(elecField);
 
     if (elecField.物类 !== 物类枚举.电场) {
         console.error('创建电场：参数错误！请确保传入电场对象！');
@@ -699,6 +783,7 @@ class 磁场 {
         this.id = nowID;
         nowID++; //nowID处理
         this.渲染对象 = null;
+        this.速度 = 取零向量();
 
         return this;
 
@@ -751,12 +836,45 @@ class 磁场 {
 
     }
 
+    销毁() {
+
+        if (this.渲染对象.attrs.位矢箭头 !== undefined) {
+            this.渲染对象.attrs.位矢箭头.destroy();
+        }
+        if (this.渲染对象.attrs.速度箭头 !== undefined) {
+            this.渲染对象.attrs.速度箭头.destroy();
+        }
+        var destroyTween = new Konva.Tween({
+            node: this.渲染对象,
+            duration: 0.5,
+            fill: 'white',
+            rotation: Math.PI * 2,
+            opacity: 0,
+            strokeWidth: 3,
+            scaleX: 0.2,
+            scaleY: 0.2
+        });
+        destroyTween.play();
+
+        let obj = this;
+        setTimeout(function () {
+            obj.渲染对象.destroy();
+            for (var i = 0; i < 诸场.length; i++) {
+                if (诸场[i].id == obj.id) {
+                    切换物体选中状态(诸场[i].渲染对象, 0);
+                    诸场.splice(i, 1);
+                }
+            }
+            更新质心渲染();
+        }, 500);
+        console.log(`磁场[id=${this.id}]已经销毁！`);
+    }
+
+
 }
 磁场.prototype.物类 = 物类枚举.磁场;
 
 function 创建磁场(magnetField) {
-
-    console.log(magnetField);
 
     if (magnetField.物类 !== 物类枚举.磁场) {
         console.error('创建磁场：参数错误！请确保传入磁场对象！');
@@ -816,7 +934,7 @@ function 计算合加速度_洛伦兹力(self) {
 
                 //求洛伦兹力
                 vel.复制自(self.速度)
-                    .旋转(四分之π * (field.场强 > 0 ? 1 : -1))
+                    .旋转90度(field.场强)
                     .数乘(self.电荷量 * field.场强);
                 //新的vel已经变成力了！
 
@@ -864,7 +982,7 @@ function 下一帧() {
 
         //警告过大速度！
         if (self.速度.求模长() > 速度上限) {
-            console.warn('Too Fast!', self.速度.求模长());
+            console.warn('太快了♂！质点凋亡（编程性死亡）中!', self.速度.求模长());
             self.渲染对象.cache();
             self.渲染对象.filters([Konva.Filters.Noise, Konva.Filters.Blur]);
             self.渲染对象.noise(100);
