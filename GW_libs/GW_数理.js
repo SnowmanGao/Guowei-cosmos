@@ -980,24 +980,25 @@ function 计算合加速度_电场力(self) {
 
 function 计算合加速度_洛伦兹力(self) {
     //下一帧() 的子模块
-    let vel = 取零向量();
+    let force = 取零向量();
     诸场.forEach(field => {
         if (field.物类 == 物类枚举.磁场) {
 
             if (field.位置.求距矢(self.位置).求模方() < field.半径 ** 2) {
 
                 //求洛伦兹力
-                vel.复制自(self.速度)
-                    .旋转90度(field.场强)
-                    .数乘(self.电荷量 * field.场强);
-                //新的vel已经变成力了！
-                return vel;
+                let vel = new 向量2().复制自(self.速度)
+                force.加和(
+                    vel
+                    .旋转90度(self.电荷量)
+                    .数乘(self.电荷量 * field.场强));
+                return force;
             }
 
         }
     })
 
-    return vel;
+    return force;
 }
 
 
@@ -1048,7 +1049,6 @@ function 下一帧() {
             setTimeout(() => {
                 self.销毁();
             }, 1000);
-            // self.路径 = [];
             self.强制归中();
         }
         if (self.位置.求模长() > 离心距上限) {
@@ -1073,7 +1073,7 @@ function 下一帧() {
 
         self.路径.push(self.位置.x, self.位置.y);
         self.路径对象.points(self.路径);
-        
+
         self.速度.数乘((1 - 速度阻尼) * 时间步长)
         self.加速度 = 取零向量();
 
