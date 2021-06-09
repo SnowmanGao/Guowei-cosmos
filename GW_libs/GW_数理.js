@@ -1037,6 +1037,7 @@ function 下一帧() {
             setTimeout(() => {
                 self.销毁();
             }, 1000);
+            // self.路径 = [];
             self.强制归中();
         }
         if (self.位置.求模长() > 离心距上限) {
