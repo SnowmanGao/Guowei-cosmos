@@ -1074,7 +1074,7 @@ function 下一帧() {
         self.路径.push(self.位置.x, self.位置.y);
         self.路径对象.points(self.路径);
 
-        self.速度.数乘((1 - 速度阻尼) * 时间步长)
+        self.速度.数乘((1 - 速度阻尼) ** 时间步长)
         self.加速度 = 取零向量();
 
     })

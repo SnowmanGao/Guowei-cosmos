@@ -151,14 +151,14 @@ function 按键处理(e) {
                 ele.attrs.物理对象.销毁();
             })
         case "NumpadAdd":
-            if (速度阻尼 > 0.6) {
+            if (速度阻尼 > 0.15) {
                 console.warn('设置速度阻尼：阻尼过大（拒绝调整）！');
                 return;
             }
             速度阻尼 += 0.004;
             break;
         case "NumpadSubtract":
-            if (速度阻尼 < -0.4) {
+            if (速度阻尼 < -0.1) {
                 console.warn('设置速度阻尼：负阻尼过大（拒绝调整）！');
                 return;
             }
@@ -168,9 +168,17 @@ function 按键处理(e) {
             速度阻尼 = 0.004;
             break;
         case "PageUp":
+            if (时间步长 > 5) {
+                console.warn('设置时间步长：时间步长过大（拒绝调整）！');
+                return;
+            }
             时间步长 *= 1.2;
             break;
         case "PageDown":
+            if (时间步长 < 0.001) {
+                console.warn('设置时间步长：时间步长过小（拒绝调整）！');
+                return;
+            }
             时间步长 *= 0.8;
             break;
         case "NumpadDivide":

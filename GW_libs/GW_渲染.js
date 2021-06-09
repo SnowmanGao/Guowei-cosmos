@@ -126,7 +126,7 @@ function 取鼠标坐标() {
 
 function 显示鼠标位矢() {
     let temp = 取鼠标坐标().四舍五入();
-    posText.text(`x: ${temp.x} , y: ${temp.y}`);
+    posText.text(`fv(${速度阻尼.toFixed(3)}) x: ${temp.x} , y: ${temp.y}`);
     pointerArrow.points([0, 0, temp.x, temp.y]);
 
 }
@@ -256,7 +256,7 @@ var guiAnim = new Konva.Animation(function () {
     absPos = 舞台.getAbsolutePosition();
     posText.x(15 - absPos.x);
     posText.y(20 - absPos.y);
-    frameText.x(宽度 / 1.5 - absPos.x);
+    frameText.x(宽度 / 1.8 - absPos.x);
     frameText.y(20 - absPos.y);
     focusText.x(10 - absPos.x);
     focusText.y(60 - absPos.y);
@@ -285,6 +285,6 @@ function 主动画函数() {
     更新质心渲染();
 
     //显示已逝帧数
-    frameText.text(`t = ${(已逝时间).toFixed(0)}`);
+    frameText.text(`(+${时间步长.toFixed(2)}) t = ${(已逝时间).toFixed(0)}`);
 
 }
