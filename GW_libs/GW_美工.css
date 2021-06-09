@@ -20,9 +20,9 @@ body{
 .btn {
     background-color: white;
     color: black;
-    min-width: 4em;
+    min-width: 3.3em;
     height: 2em;
-    font-size: 2em;
+    font-size: 1.8em;
     padding: 3px 5px 6px 5px;
     margin: 5px 5px;
     -webkit-transition-duration: 0.4s;

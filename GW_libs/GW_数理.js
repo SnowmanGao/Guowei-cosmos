@@ -411,10 +411,12 @@ class 质点 {
         this.id = nowID;
         nowID++; //nowID处理
         this.渲染对象 = null;
+        this.路径对象 = null;
 
         //用于缓存，请勿直接设置
         this.加速度 = 取零向量();
         this.行将就木 = false;
+        this.路径 = [];
 
         return this;
     }
@@ -428,6 +430,7 @@ class 质点 {
         if (this.渲染对象.attrs.速度箭头 !== undefined) {
             this.渲染对象.attrs.速度箭头.destroy();
         }
+        this.清除路径();
         var destroyTween = new Konva.Tween({
             node: this.渲染对象,
             duration: 0.5,
@@ -491,9 +494,18 @@ class 质点 {
             切换物体选中状态(this);
         })
 
+        var line = new Konva.Line({
+            points: [],
+            stroke: this.样式.颜色,
+            strokeWidth: 1.5,
+            opacity: 0.65
+        });
+
         //绑定对象
         this.渲染对象 = circle;
+        this.路径对象 = line;
         图层_物体.add(circle);
+        图层_物体.add(line);
 
     }
 
@@ -536,6 +548,12 @@ class 质点 {
         }
 
     }
+
+    清除路径() {
+        this.路径 = [];
+        this.路径对象.points([]);
+    }
+
 }
 质点.prototype.物类 = 物类枚举.质点;
 
@@ -1042,12 +1060,16 @@ function 下一帧() {
         self.渲染对象.x(self.位置.x);
         self.渲染对象.y(self.位置.y);
 
+        self.路径.push(self.位置.x, self.位置.y);
+        self.路径对象.points(self.路径);
+
+
         self.加速度 = 取零向量();
 
     })
 
     主动画函数();
-    已逝帧数++;
+    已逝时间 += 时间步长;
     // 舞台.draw();
 
 }

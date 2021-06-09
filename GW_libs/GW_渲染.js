@@ -1,4 +1,4 @@
-var 已逝帧数 = 0
+var 已逝时间 = 0
 var 宽度 = window.innerWidth;
 var 高度 = window.innerHeight;
 //鼠标是否在画布
@@ -44,7 +44,11 @@ var 图层_界面 = new Konva.Layer();
 var 图层_场 = new Konva.Layer();
 var 图层_物体 = new Konva.Layer();
 
-
+var redLine = new Konva.Line({
+    points: [],
+    stroke: 'red',
+    strokeWidth: 1,
+});
 var posText = new Konva.Text({
     x: 10 - 宽度 / 2,
     y: 15 - 高度 / 2,
@@ -91,13 +95,14 @@ var massCenterStar = new Konva.Star({
     opacity: 0.5
 })
 
+图层_界面.add(redLine);
 图层_界面.add(posText);
 图层_界面.add(frameText);
 图层_界面.add(focusText);
 图层_界面.add(pointerArrow);
 图层_界面.add(massCenterStar);
 
-舞台.add(图层_界面); 
+舞台.add(图层_界面);
 舞台.add(图层_场);
 舞台.add(图层_物体);
 
@@ -271,7 +276,7 @@ var mainAnim = new Konva.Animation(function () {
 
     下一帧();
 
-}, 图层_场);
+}, 图层_场); 
 
 
 function 主动画函数() {
@@ -280,6 +285,6 @@ function 主动画函数() {
     更新质心渲染();
 
     //显示已逝帧数
-    frameText.text(`t = ${(已逝帧数*时间步长).toFixed(0)}`);
+    frameText.text(`t = ${(已逝时间).toFixed(0)}`);
 
 }

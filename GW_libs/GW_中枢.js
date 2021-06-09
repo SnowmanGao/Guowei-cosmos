@@ -80,7 +80,7 @@ function sets() {
         '引力常数(_G_)': _G_,
         '初始质点数': 初始质点数,
         '速度上限': 速度上限,
-        '离心距上限':离心距上限,
+        '离心距上限': 离心距上限,
     })
 
 }
@@ -148,6 +148,15 @@ function 按键处理(e) {
             选中图形列.forEach((ele) => {
                 ele.attrs.物理对象.销毁();
             })
+        case "NumpadAdd":
+            时间步长 *= 1.2;
+            break;
+        case "NumpadSubtract":
+            时间步长 *= 0.8;
+            break;
+        case "NumpadMultiply":
+            时间步长 = 1;
+            break;
         default:
             break;
     }
@@ -155,6 +164,15 @@ function 按键处理(e) {
     更新物体位矢箭头();
     e.preventDefault();
 }
+
+function 清除所有路径() {
+
+    万物.forEach(ele => {
+        ele.清除路径()
+    });
+
+}
+
 
 /**------------------------------------------- */
 
