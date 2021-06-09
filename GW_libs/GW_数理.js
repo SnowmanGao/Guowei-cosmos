@@ -982,7 +982,6 @@ function 计算合加速度_洛伦兹力(self) {
                     .旋转90度(field.场强)
                     .数乘(self.电荷量 * field.场强);
                 //新的vel已经变成力了！
-
                 return vel;
             }
 
@@ -1062,8 +1061,8 @@ function 下一帧() {
 
         self.路径.push(self.位置.x, self.位置.y);
         self.路径对象.points(self.路径);
-
-
+        
+        self.速度.数乘((1 - 速度阻尼) * 时间步长)
         self.加速度 = 取零向量();
 
     })

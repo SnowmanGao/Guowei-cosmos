@@ -12,6 +12,7 @@ var 寰宇, everything = {
 var fzc = new 向量2(115114, 115114)
 
 var 速度上限 = Number.MAX_SAFE_INTEGER,
+    速度阻尼 = 0.004,
     离心距上限 = Number.MAX_SAFE_INTEGER,
     初始质点数 = 3;
 
@@ -80,6 +81,7 @@ function sets() {
         '引力常数(_G_)': _G_,
         '初始质点数': 初始质点数,
         '速度上限': 速度上限,
+        '速度阻尼': 速度阻尼,
         '离心距上限': 离心距上限,
     })
 
@@ -149,12 +151,29 @@ function 按键处理(e) {
                 ele.attrs.物理对象.销毁();
             })
         case "NumpadAdd":
-            时间步长 *= 1.2;
+            if (速度阻尼 > 0.6) {
+                console.warn('设置速度阻尼：阻尼过大（拒绝调整）！');
+                return;
+            }
+            速度阻尼 += 0.004;
             break;
         case "NumpadSubtract":
-            时间步长 *= 0.8;
+            if (速度阻尼 < -0.4) {
+                console.warn('设置速度阻尼：负阻尼过大（拒绝调整）！');
+                return;
+            }
+            速度阻尼 -= 0.004;
             break;
         case "NumpadMultiply":
+            速度阻尼 = 0.004;
+            break;
+        case "PageUp":
+            时间步长 *= 1.2;
+            break;
+        case "PageDown":
+            时间步长 *= 0.8;
+            break;
+        case "NumpadDivide":
             时间步长 = 1;
             break;
         default:

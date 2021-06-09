@@ -20,4 +20,16 @@ SnowmanGao 出品
 
 * <kbd>C</kbd>：强制将物体移动到原点附近
 
+* <kbd>PageUp</kbd>：增大时间步长
+
+* <kbd>PageDown</kbd>：减小时间步长
+
+* <kbd>PageDown</kbd>：恢复时间步长
+
+* <kbd>+</kbd>：增强速度阻尼
+
+* <kbd>-</kbd>：减弱速度阻尼
+
+* <kbd>+</kbd>：恢复速度阻尼
+
 * <kbd>GIAO</kbd>：在控制台输入 fzc.求偶() 会使浏览器爆炸
