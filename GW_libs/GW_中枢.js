@@ -176,9 +176,16 @@ function 按键处理(e) {
         case "NumpadDivide":
             时间步长 = 1;
             break;
+        case "Backspace":
+            清除所有路径();
+            break;
         default:
             break;
     }
+
+    //交给mod(JavaScript代码)
+    MOD_按键时执行(e);
+
     更新物体位置();
     更新物体位矢箭头();
     e.preventDefault();

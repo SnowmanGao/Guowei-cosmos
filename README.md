@@ -20,6 +20,8 @@ SnowmanGao 出品
 
 * <kbd>C</kbd>：强制将物体移动到原点附近
 
+* <kbd>Backspace</kbd>：清楚所有路径
+
 * <kbd>PageUp</kbd>：增大时间步长
 
 * <kbd>PageDown</kbd>：减小时间步长

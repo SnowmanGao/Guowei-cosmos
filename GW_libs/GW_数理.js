@@ -423,6 +423,9 @@ class 质点 {
 
     销毁() {
 
+        //交给mod(JavaScript代码)
+        MOD_物体销毁时执行('this');
+
         this.行将就木 = true
         if (this.渲染对象.attrs.位矢箭头 !== undefined) {
             this.渲染对象.attrs.位矢箭头.destroy();
@@ -762,6 +765,9 @@ class 电场 {
 
     销毁() {
 
+        //交给mod(JavaScript代码)
+        MOD_物体销毁时执行('this');
+
         if (this.渲染对象.attrs.位矢箭头 !== undefined) {
             this.渲染对象.attrs.位矢箭头.destroy();
         }
@@ -883,6 +889,9 @@ class 磁场 {
 
     销毁() {
 
+        //交给mod(JavaScript代码)
+        MOD_物体销毁时执行('this');
+
         if (this.渲染对象.attrs.位矢箭头 !== undefined) {
             this.渲染对象.attrs.位矢箭头.destroy();
         }
@@ -995,6 +1004,8 @@ function 计算合加速度_洛伦兹力(self) {
 
 function 下一帧() {
 
+    //交给mod(JavaScript代码)
+    MOD_每帧开始时执行();
 
     //主遍历 
     // self,other都是质点！
@@ -1070,5 +1081,7 @@ function 下一帧() {
     主动画函数();
     已逝时间 += 时间步长;
     // 舞台.draw();
+
+    MOD_每帧结束时执行();
 
 }

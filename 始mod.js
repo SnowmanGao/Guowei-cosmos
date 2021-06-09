@@ -53,3 +53,20 @@ function MOD_载入完成时执行() {
 
 
 }
+
+
+function MOD_物体销毁时执行(stuff) {
+
+}
+
+function MOD_每帧开始时执行() {
+
+}
+
+function MOD_每帧结束时执行() {
+
+}
+
+function MOD_按键时执行(e) {
+    
+}
