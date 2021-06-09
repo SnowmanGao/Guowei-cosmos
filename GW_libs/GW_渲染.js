@@ -97,7 +97,7 @@ var massCenterStar = new Konva.Star({
 图层_界面.add(pointerArrow);
 图层_界面.add(massCenterStar);
 
-舞台.add(图层_界面);
+舞台.add(图层_界面); 
 舞台.add(图层_场);
 舞台.add(图层_物体);
 

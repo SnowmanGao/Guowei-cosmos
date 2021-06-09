@@ -412,14 +412,16 @@ class 质点 {
         nowID++; //nowID处理
         this.渲染对象 = null;
 
-        //用于缓存受力，请勿直接设置加速度
+        //用于缓存，请勿直接设置
         this.加速度 = 取零向量();
+        this.行将就木 = false;
 
         return this;
     }
 
     销毁() {
 
+        this.行将就木 = true
         if (this.渲染对象.attrs.位矢箭头 !== undefined) {
             this.渲染对象.attrs.位矢箭头.destroy();
         }
@@ -525,15 +527,35 @@ class 质点 {
         return ans;
 
     }
+
+    强制归中(保留速度 = true) {
+
+        this.位置 = 生成随机向量(200);
+        if (保留速度) {
+            this.速度 = 生成随机向量(2);
+        }
+
+    }
 }
 质点.prototype.物类 = 物类枚举.质点;
 
 
+/**传入渲染对象，tabTo可选，若为-1则不强制*/
 function 切换物体选中状态(obj, tabTo = -1) {
 
+    if (obj == undefined) {
+        console.warn('切换物体选中状态：物体（渲染对象）不存在！');
+        return;
+    }
+
+    //强制切换
     if (tabTo >= 0) {
         //强制切换状态 0:取消选中 1:选中
-        obj.attrs.为选中 = !tabTo;
+        if (obj.attrs.为选中 ^ tabTo) {
+            console.log(obj.attrs.为选中,tabTo,obj.attrs.为选中 ^ tabTo)
+        } else {
+            return;
+        }
     }
 
     if (obj.attrs.为选中) {
@@ -543,12 +565,15 @@ function 切换物体选中状态(obj, tabTo = -1) {
         switch (obj.attrs.物理对象.物类) {
             case 物类枚举.质点:
                 obj.stroke('#000');
+                obj.opacity(0.5);
                 break;
             case 物类枚举.电场:
                 obj.stroke();
+                obj.opacity(0.3);
                 break;
             case 物类枚举.磁场:
                 obj.stroke();
+                obj.opacity(0.3);
                 break;
             default:
                 console.error("切换物体选中状态：错误的物类！");
@@ -596,6 +621,7 @@ function 切换物体选中状态(obj, tabTo = -1) {
         图层_界面.add(objVelArrow);
         obj.strokeWidth(3);
         obj.stroke(obj.attrs.fill);
+        obj.opacity(0.65);
         obj.attrs.为选中 = true;
         选中图形列.push(obj);
         更新物体位矢箭头();
@@ -737,13 +763,13 @@ class 电场 {
 
         let obj = this;
         setTimeout(function () {
-            obj.渲染对象.destroy();
             for (var i = 0; i < 诸场.length; i++) {
                 if (诸场[i].id == obj.id) {
-                    诸场.splice(i, 1);
                     if (诸场[i] !== undefined) {
                         切换物体选中状态(诸场[i].渲染对象, 0);
                     }
+                    诸场.splice(i, 1);
+                    obj.渲染对象.destroy();
                 }
             }
             更新质心渲染();
@@ -951,12 +977,15 @@ function 计算合加速度_洛伦兹力(self) {
 
 function 下一帧() {
 
-    // console.time(1);
 
     //主遍历 
     // self,other都是质点！
     万物.forEach(self => {
 
+        if (self.行将就木) {
+            //拒绝参与运算，以防bug 
+            return;
+        }
         //万有引力的优化算法
         万物.forEach(other => {
             if (self.id < other.id) {
@@ -978,11 +1007,11 @@ function 下一帧() {
             self.加速度.加和(计算合加速度_洛伦兹力(self));
         }
 
-        // console.timeEnd(1);
 
-        //警告过大速度！
+        //警告过大！
         if (self.速度.求模长() > 速度上限) {
-            console.warn('太快了♂！质点凋亡（编程性死亡）中!', self.速度.求模长());
+            self.行将就木 = true;
+            console.warn(`太快了♂！质点[id:${self.id}]将要凋亡(编程性死亡)!\n |vel| = ${self.速度.求模长()}`);
             self.渲染对象.cache();
             self.渲染对象.filters([Konva.Filters.Noise, Konva.Filters.Blur]);
             self.渲染对象.noise(100);
@@ -990,9 +1019,19 @@ function 下一帧() {
             setTimeout(() => {
                 self.销毁();
             }, 1000);
-            self.位置 = 生成随机向量(200);
-            self.速度 = 生成随机向量(2);
-            self.加速度 = 生成随机向量(0);
+            self.强制归中();
+        }
+        if (self.位置.求模长() > 离心距上限) {
+            self.行将就木 = true;
+            console.warn(`太远了♂！质点[id:${self.id}]将要凋亡(编程性死亡)!\n |pos| = ${self.位置 .求模长()}`);
+            self.渲染对象.cache();
+            self.渲染对象.filters([Konva.Filters.Noise, Konva.Filters.Blur]);
+            self.渲染对象.noise(100);
+            self.渲染对象.blurRadius(0.5);
+            setTimeout(() => {
+                self.销毁();
+            }, 1000);
+            self.强制归中();
         }
 
         //微分合并

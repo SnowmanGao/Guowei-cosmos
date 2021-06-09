@@ -11,7 +11,8 @@ var 寰宇, everything = {
 // var fzc = new 矩阵3();
 var fzc = new 向量2(115114, 115114)
 
-var 速度上限 = 100,
+var 速度上限 = Number.MAX_SAFE_INTEGER,
+    离心距上限 = Number.MAX_SAFE_INTEGER,
     初始质点数 = 3;
 
 
@@ -78,7 +79,8 @@ function sets() {
         '时间步长': 时间步长,
         '引力常数(_G_)': _G_,
         '初始质点数': 初始质点数,
-        '速度上限': 速度上限
+        '速度上限': 速度上限,
+        '离心距上限':离心距上限,
     })
 
 }
