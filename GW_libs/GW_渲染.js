@@ -204,7 +204,7 @@ var guiAnim = new Konva.Animation(function () {
 
             focusText.text(
                 `(圆形)质点 [id:${temp[5]}]  
-   *    质量m = ${temp[6]}
+   *    质量m = ${temp[6]}, 电荷量 = ${temp[7]}
         位矢r = (${temp[0]}, ${temp[1]})
         速度v = (${temp[2]}, ${temp[3]})
   ${force_G_text}

@@ -552,7 +552,7 @@ function 切换物体选中状态(obj, tabTo = -1) {
     if (tabTo >= 0) {
         //强制切换状态 0:取消选中 1:选中
         if (obj.attrs.为选中 ^ tabTo) {
-            console.log(obj.attrs.为选中,tabTo,obj.attrs.为选中 ^ tabTo)
+            切换物体选中状态()
         } else {
             return;
         }
@@ -656,7 +656,8 @@ function fixInfo(info) {
     arr[2] = (info.速度.x).toFixed(1);
     arr[3] = (info.速度.y).toFixed(1);
     arr[5] = info.id;
-    arr[6] = (info.质量).toFixed(1)
+    arr[6] = (info.质量).toFixed(1);
+    arr[7] = (info.电荷量).toFixed(1);
     return arr;
 }
 
