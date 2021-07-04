@@ -232,7 +232,7 @@ class 向量2 {
 
     };
 
-    /**传入旋转方向：若为正则顺时针，零和负则为逆时针（默认） 
+    /**传入旋转方向：若方向为正则顺时针，否则为逆时针旋转（默认逆时针） 
      * tips: true == 1 , false == 0
      */
     旋转90度(sgn = -1) {
@@ -253,8 +253,7 @@ class 向量2 {
         var x = this.x - center.x,
             y = this.y - center.y;
 
-        this.x = x * c - y * s + center.x;
-        this.y = x * s + y * c + center.y;
+        this.设置xy(x * c - y * s + center.x, x * s + y * c + center.y);
 
         return this;
 
@@ -273,7 +272,7 @@ class 向量2 {
 
     };
 
-    曼哈顿模长() {
+    求曼哈顿模长() {
 
         return Math.abs(this.x) + Math.abs(this.y);
 
@@ -311,7 +310,7 @@ class 向量2 {
 
     }
 
-    /** 变为单位向量。
+    /** 使自己变为单位向量。
      * (0,0) 的单位向量特设为 (0,0) 
      */
     归一化() {
