@@ -14,19 +14,25 @@
     <div id='canvaser'></div>
     <div class="gui">
         <!-- <button class="btn" onclick="zoom('center')" onkeydown="options.永远居中=true;">居中</button> -->
-        <button class="btn" onclick="切换模拟状态()">停/始</button>
+        <button class="btn" onclick="切换始停()">始/停</button>
         <button class="btn" onclick="下一帧()">步进</button>
-        <button class="btn" onclick="清除所有路径()">清爽</button>
-        <audio src="./GW_BGMusic/Cry For the Moon.m4a" autoplay></audio>
+        <button class="btn" onclick="清除所有路径()">清理</button>
+        <audio id='bgm' src="./GW_BGMusic/Cry For the Moon.m4a" loop controls autoplay></audio>
+        <input type="file" onchange="载入MOD(this)" />
     </div>
 </body>
 
 </html>
 
 
+<script src="./GW_libs/GW_工具.js"></script>
 <script src="./GW_libs/GW_数理.js"></script>
+<script src="./GW_libs/GW_向量.js"></script>
+<script src="./GW_libs/GW_场.js"></script>
 <script src="./GW_libs/konva.js"></script>
 <script src="./GW_libs/GW_渲染.js"></script>
 <script src="./GW_libs/GW_中枢.js"></script>
 
 <script src="始mod.js"></script>
+
+<script src="./GW_mods/分子力整合包.js"></script>

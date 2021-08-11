@@ -21,17 +21,20 @@ var 舞台 = new Konva.Stage({
     height: 高度,
     draggable: true,
 });
-舞台.on('mouseover', function () {
+舞台.on('mouseover', function() {
     isMsOverCanvas = true;
     画布容器.focus();
 });
-舞台.on('mouseout', function () {
+舞台.on('mouseout', function() {
     isMsOverCanvas = false;
 });
+舞台.on('click', function() {
+    取消选中所有()
+})
 var 画布容器 = 舞台.container();
 画布容器.tabIndex = 1;
 画布容器.focus();
-画布容器.addEventListener('keydown', function (e) {
+画布容器.addEventListener('keydown', function(e) {
 
     按键处理(e);
 
@@ -126,7 +129,7 @@ function 取鼠标坐标() {
 
 function 显示鼠标位矢() {
     let temp = 取鼠标坐标().四舍五入();
-    posText.text(`fv(${速度阻尼.toFixed(3)}) x: ${temp.x} , y: ${temp.y}`);
+    posText.text(`阻尼(${速度阻尼.toFixed(3)}) x: ${temp.x} , y: ${temp.y}`);
     pointerArrow.points([0, 0, temp.x, temp.y]);
 
 }
@@ -171,7 +174,7 @@ function 更新物体位置() {
 /*---------------------------动画gui------------------------------- */
 
 /**当鼠标在画布上时执行 */
-var guiAnim = new Konva.Animation(function () {
+var guiAnim = new Konva.Animation(function() {
     if (!isMsOverCanvas) {
         显示鼠标位矢();
         return false;
@@ -182,7 +185,10 @@ var guiAnim = new Konva.Animation(function () {
     //显示鼠标悬停物体信息
     switch (msOverType) {
         case 物类枚举.质点:
-            focusText.fill('#5A9367');
+            // focusText.fill('#5A9367');
+            focusText.fill(msOverObj.样式.颜色)
+            focusText.stroke('#555')
+            focusText.strokeWidth(0.2)
             let temp = fixInfo(msOverObj);
 
             //万有引力G
@@ -207,14 +213,22 @@ var guiAnim = new Konva.Animation(function () {
                 force_L_text = `-> 洛伦兹力F_l = (${force_L.x.toFixed(2)}, ${force_L.y.toFixed(2)})`;
             }
 
-            focusText.text(
-                `(圆形)质点 [id:${temp[5]}]  
+            let txt = `(圆形)质点 [id:${temp[5]}]  
    *    质量m = ${temp[6]}, 电荷量 = ${temp[7]}
         位矢r = (${temp[0]}, ${temp[1]})
         速度v = (${temp[2]}, ${temp[3]})
-  ${force_G_text}
-  ${force_E_text}${force_L_text}`
-            );
+  ${force_G_text}${force_E_text}${force_L_text}`
+
+            //MOD拓展
+            try {
+                txt = MOD_物体信息修改(msOverObj, txt)
+            } catch (err) {
+                if (err.message != 'MOD_物体信息修改 is not defined') {
+                    console.error('MOD出现错误：\n' + err);
+                }
+            }
+
+            focusText.text(txt);
 
             if (!为运行中) {
                 更新物体位矢箭头();
@@ -266,17 +280,17 @@ var guiAnim = new Konva.Animation(function () {
 
 
 /**当模拟运行时执行 */
-var mainAnim = new Konva.Animation(function () {
+var mainAnim = new Konva.Animation(function() {
 
     //防止bug
-    if (typeof 万物 == 'undefined') {
-        console.log('归谬者：万物为空，行空白帧。');
-        return false;
-    }
+    // if (typeof 万物 == 'undefined') {
+    //     console.log('归谬者：万物为空，行空白帧。');
+    //     return false;
+    // }
 
     下一帧();
 
-}, 图层_场); 
+}, 图层_场);
 
 
 function 主动画函数() {
@@ -285,6 +299,6 @@ function 主动画函数() {
     更新质心渲染();
 
     //显示已逝帧数
-    frameText.text(`(+${时间步长.toFixed(2)}) t = ${(已逝时间).toFixed(0)}`);
+    frameText.text(`(步长 ${时间步长.toFixed(2)}) t = ${(已逝时间).toFixed(0)}`);
 
 }

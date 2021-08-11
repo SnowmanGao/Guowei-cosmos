@@ -1,10 +1,19 @@
+/* File Info 
+ * Author:      SnowmanGao
+ * CreateTime:  2021/6/5下午1:38:15 
+ * LastEditor:  SnowmanGao
+ * ModifyTime:  2021/8/11下午3:41:59 
+ * Description: 定义了一切用到的数理工具，包括常用函数、向量、矩阵工具，
+ *              还可以完成简单的物理计算。
+ */
+
 var nowID = 1;
 var 为运行中 = false;
 var 时间步长 = 1
 
 var 万物 = [];
 var 诸场 = [];
-var 寰宇, everything = {
+var ALL = {
     '万物': 万物,
     '诸场': 诸场
 };
@@ -25,202 +34,47 @@ const _默认样式 = {
 //上下左右
 var 默认调整步长 = 10;
 
-
-
-//禁止页面滑动
-document.body.addEventListener('touchmove', function (e) {
-    e.preventDefault();
-}, {
-    passive: false
-    //passive 参数不能省略，用来兼容ios和android
-});
-document.body.addEventListener('scroll', function (e) {
-    e.preventDefault();
-});
-
-/**-----------------操作-------------------- */
-
-function 切换模拟状态() {
-    if (mainAnim.isRunning()) {
-        为运行中 = false;
-        mainAnim.stop()
-    } else {
-        为运行中 = true;
-        mainAnim.start();
-    }
+//功能键状态
+var 键状态 = {
+    'ctrl': false,
+    'shift': false
 }
-
-function test() {
-    let arr = {};
-    let arr2 = {};
-    万物.forEach(ele => {
-        arr[ele.id] = {
-            '质量': ele.质量,
-            'x': ele.位置.x,
-            'y': ele.位置.y
-        }
-    })
-    诸场.forEach(ele => {
-        arr2[ele.id] = {
-            '场强大小': ele.场强.求模长(),
-            '半径': ele.半径,
-            'x': ele.位置.x,
-            'y': ele.位置.y,
-        }
-    })
-    console.group('寰宇：{质点系，场系}')
-    console.table(arr);
-    console.table(arr2);
-    console.groupEnd()
-}
-
-function sets() {
-
-    console.table({
-        '时间步长': 时间步长,
-        '引力常数(_G_)': _G_,
-        '初始质点数': 初始质点数,
-        '速度上限': 速度上限,
-        '速度阻尼': 速度阻尼,
-        '离心距上限': 离心距上限,
-    })
-
-}
-
-function 按键处理(e) {
-
-    // console.log(e);
-
-    let delta = 默认调整步长;
-    if (e.ctrlKey) {
-        delta *= 5
-    }
-    if (e.shiftKey) {
-        delta /= 10
-    }
-
-    switch (e.code) {
-        case "ArrowLeft":
-            选中图形列.forEach(ele => {
-                ele.attrs.物理对象.位置.x -= delta
-            });
-            break;
-        case 'ArrowUp':
-            选中图形列.forEach(ele => {
-                ele.attrs.物理对象.位置.y -= delta
-            });
-            break;
-        case "ArrowRight":
-            选中图形列.forEach(ele => {
-                ele.attrs.物理对象.位置.x += delta
-            });
-            break;
-        case "ArrowDown":
-            选中图形列.forEach(ele => {
-                ele.attrs.物理对象.位置.y += delta
-            });
-            break;
-        case "KeyC":
-            选中图形列.forEach(ele => {
-                console.log(ele);
-                ele.attrs.物理对象.位置 = 生成随机向量();
-            });
-            break;
-        case "Space":
-            切换模拟状态();
-            break;
-        case "Enter":
-            下一帧();
-            break;
-        case "KeyA":
-            if (e.shiftKey) {
-                诸场.forEach((ele) => {
-                    ele.渲染对象.fire('click');
-                    更新物体位矢箭头();
-                })
-            }
-            if (e.ctrlKey) {
-                万物.forEach((ele) => {
-                    ele.渲染对象.fire('click');
-                    更新物体位矢箭头();
-                })
-            }
-            break;
-        case "Delete":
-            选中图形列.forEach((ele) => {
-                ele.attrs.物理对象.销毁();
-            })
-        case "NumpadAdd":
-            if (速度阻尼 > 0.15) {
-                console.warn('设置速度阻尼：阻尼过大（拒绝调整）！');
-                return;
-            }
-            速度阻尼 += 0.004;
-            break;
-        case "NumpadSubtract":
-            if (速度阻尼 < -0.1) {
-                console.warn('设置速度阻尼：负阻尼过大（拒绝调整）！');
-                return;
-            }
-            速度阻尼 -= 0.004;
-            break;
-        case "NumpadMultiply":
-            速度阻尼 = 0.004;
-            break;
-        case "PageUp":
-            if (时间步长 > 5) {
-                console.warn('设置时间步长：时间步长过大（拒绝调整）！');
-                return;
-            }
-            时间步长 *= 1.2;
-            break;
-        case "PageDown":
-            if (时间步长 < 0.001) {
-                console.warn('设置时间步长：时间步长过小（拒绝调整）！');
-                return;
-            }
-            时间步长 *= 0.8;
-            break;
-        case "NumpadDivide":
-            时间步长 = 1;
-            break;
-        case "Backspace":
-            清除所有路径();
-            break;
-        default:
-            break;
-    }
-
-    //交给mod(JavaScript代码)
-    MOD_按键时执行(e);
-
-    更新物体位置();
-    更新物体位矢箭头();
-    e.preventDefault();
-}
-
-function 清除所有路径() {
-
-    万物.forEach(ele => {
-        ele.清除路径()
-    });
-
-}
-
-
-/**------------------------------------------- */
 
 
 /**在html载入完成后执行(body:onload) */
 function 初始化() {
 
-    //交给mod(JavaScript代码)
-    MOD_载入完成时执行();
+    try {
+        MOD_fzl_初始化()
+    } catch (err) {
+        if (err.message == 'MOD_初始化 is not defined') {
+            console.warn('主MOD中没有初始化函数！');
+        } else {
+            console.error('MOD出现错误：\n' + err);
+        }
+    }
+
     test();
 
     更新质心渲染();
 
+    //刷新后续播bgm
+    let bgmTime = localStorage.getItem('bgm_music')
+    let bgmer = document.getElementById('bgm')
+    if (bgmTime == undefined || bgmTime > bgmer.duration) {
+        localStorage.setItem('bgm_music', 0)
+    }
+    bgmer.currentTime = bgmTime
+    setInterval(() => {
+        localStorage.setItem('bgm_music', bgmer.currentTime)
+        localStorage.setItem('bgm_pause', bgmer.paused)
+    }, 500);
+
+    if (localStorage.getItem('bgm_pause') == 'true') {
+        bgmer.pause()
+    }
 }
+
 
 
 //启动渲染动画
@@ -228,4 +82,44 @@ guiAnim.start();
 mainAnim.start();
 
 //使得初始模拟状态为暂停
-切换模拟状态();
+切换始停();
+
+function 下一帧() {
+
+    //主遍历 
+    // self,other都是质点！
+    万物.forEach(self => {
+
+        if (self.行将就木) {
+            //拒绝参与运算，以防bug 
+            return;
+        }
+
+        万有引力_遍历(self)
+
+        电磁力_遍历(self)
+
+
+        //警告过大！
+        越界检查_遍历(self)
+
+        //微分合并
+        self.速度.加和(self.加速度.求数乘(时间步长));
+        self.位置.加和(self.速度.求数乘(时间步长));
+
+        self.渲染对象.x(self.位置.x);
+        self.渲染对象.y(self.位置.y);
+
+        self.路径.push(self.位置.x, self.位置.y);
+        self.路径对象.points(self.路径);
+
+        self.速度.数乘((1 - 速度阻尼) ** 时间步长)
+        self.加速度 = 取零向量();
+
+    })
+
+    主动画函数();
+    已逝时间 += 时间步长;
+    // 舞台.draw();
+
+}
